@@ -1,0 +1,25 @@
+number = r'[-]?(\d*\.\d*|\d+)'
+id = r'\w[\d\w]*'
+setScale = "." "setScale" "(" number "," ("BigDecimal.ROUND_DOWN" /"BigDecimal.ROUND_UP") ")"
+multiply =  "." "multiply" "(" expression ")"
+add = "." "add" "(" expression ")"
+subtract =  "." "subtract" "(" expression ")"
+divide = "." "divide" "(" expression ("," number "," ("BigDecimal.ROUND_DOWN" /"BigDecimal.ROUND_UP") )? ")"
+compareTo = "." "compareTo" "(" expression ")" ("<=" / ">=" / "<" / ">" / "==") number
+valueOf = "BigDecimal" "." "valueOf" "(" expression ")"
+methods = multiply / divide / add / subtract / setScale / compareTo
+call = (parens / valueOf / id ) methods+
+parens = "(" expression ")"
+var = id ("." id)?
+arrayAccess = id "[" expression "]"
+newBD = "new BigDecimal" "(" number ")"
+term0 = ( number / arrayAccess / call / valueOf / newBD  / parens / var )
+term90 = term0 (( "*" / "/") term0)*
+term100 = term90 (("+" / "-") term90)*
+term110 = term100 (("<=" / ">=" / "<" / ">") term100)*
+term120 = term110 (("==" / "!=") term110)*
+term130 = term120 ("&&" term120)*
+term140 = term130 ("||" term130)*
+expression = term140
+assign = id "=" expression
+start = assign / expression EOF
