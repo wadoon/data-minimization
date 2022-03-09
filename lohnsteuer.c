@@ -1,5 +1,5 @@
+#include <assert.h>
 #include <stdbool.h>
-typedef double BigDecimal;
 
 double round_up(double value, int digits) {
   assert(digits < 3);
@@ -13,7 +13,7 @@ double round_up(double value, int digits) {
 }
 
 double round_down(double value, int digits) {
-  assert digits < 3;
+  assert(digits < 3);
   if (digits == 0) {
     return (int)value;
   } else if (digits == 1) {
@@ -68,7 +68,7 @@ int ALTER1;
 /*  in VKAPA und VMT enthaltene Entschädigungen nach §24 Nummer 1 EStG
                      sowie tarifermäßigt zu besteuernde Vorteile bei
    Vermögensbeteiligungen (§ 19a Absatz 4 EStG) in Cent  */
-BigDecimal ENTSCH = (double)0;
+double ENTSCH = (double)0;
 /*  eingetragener Faktor mit drei Nachkommastellen  */
 double f = 1.0;
 /*  Jahresfreibetrag für die Ermittlung der Lohnsteuer für die sonstigen Bezüge
@@ -76,13 +76,13 @@ double f = 1.0;
    EStG nach Maßgabe der elektronischen Lohnsteuerabzugsmerkmale nach § 39e EStG
    oder der Eintragung auf der Bescheinigung für den Lohnsteuerabzug 2022 in
    Cent (ggf. 0)  */
-BigDecimal JFREIB;
+double JFREIB;
 /*  Jahreshinzurechnungsbetrag für die Ermittlung der Lohnsteuer für die
    sonstigen Bezüge sowie für Vermögensbeteiligungen nach § 19a Absatz 1 und 4
    EStG nach Maßgabe der elektronischen Lohnsteuerabzugsmerkmale nach § 39e EStG
    oder der Eintragung auf der Bescheinigung für den Lohnsteuerabzug 2022 in
    Cent (ggf. 0)  */
-BigDecimal JHINZU;
+double JHINZU;
 /*  Voraussichtlicher Jahresarbeitslohn ohne sonstige Bezüge (d.h. auch ohne
    Vergütung für mehrjährige Tätigkeit und ohne die zu besteuernden Vorteile bei
    Vermögensbeteiligungen, § 19a Absatz 4 EStG) in Cent. Anmerkung: Die Eingabe
@@ -93,9 +93,9 @@ BigDecimal JHINZU;
                      besteuernde Vorteile bei Vermögensbeteiligungen (§ 19a
    Absatz 4 EStG). Vergütungen für mehrjährige Tätigkeit aus einem
    vorangegangenen Abrechnungszeitraum werden in voller Höhe hinzugerechnet. */
-BigDecimal JRE4;
+double JRE4;
 /*  In JRE4 enthaltene Versorgungsbezuege in Cents (ggf. 0)  */
-BigDecimal JVBEZ;
+double JVBEZ;
 /* Merker für die Vorsorgepauschale
                                 2 = der Arbeitnehmer ist NICHT in der
    gesetzlichen Rentenversicherung versichert.
@@ -112,7 +112,7 @@ int KRV;
    Dezimalstellen.
                          Der von der Kranken-kasse festgesetzte
    Zusatzbeitragssatz ist bei Abweichungen unmaßgeblich.  */
-BigDecimal KVZ;
+double KVZ;
 /*  Lohnzahlungszeitraum:
                      1 = Jahr
                      2 = Monat
@@ -122,19 +122,19 @@ int LZZ;
 /*  Der als elektronisches Lohnsteuerabzugsmerkmal für den Arbeitgeber nach §
    39e EStG festgestellte oder in der Bescheinigung für den Lohnsteuerabzug 2022
    eingetragene Freibetrag für den Lohnzahlungszeitraum in Cent  */
-BigDecimal LZZFREIB;
+double LZZFREIB;
 /*  Der als elektronisches Lohnsteuerabzugsmerkmal für den Arbeitgeber nach §
    39e EStG festgestellte oder in der Bescheinigung für den Lohnsteuerabzug 2022
    eingetragene Hinzurechnungsbetrag für den Lohnzahlungszeitraum in Cent  */
-BigDecimal LZZHINZU;
+double LZZHINZU;
 /*  Nicht zu besteuernde Vorteile bei Vermögensbeteiligungen
                      (§ 19a Absatz 1 Satz 4 EStG) in Cent  */
-BigDecimal MBV;
+double MBV;
 /*  Dem Arbeitgeber mitgeteilte Zahlungen des Arbeitnehmers zur privaten
                      Kranken- bzw. Pflegeversicherung im Sinne des §10 Abs. 1
    Nr. 3 EStG 2010 als Monatsbetrag in Cent (der Wert ist inabhängig vom
    Lohnzahlungszeitraum immer als Monatsbetrag anzugeben). */
-BigDecimal PKPV = (double)0;
+double PKPV = (double)0;
 /*  Krankenversicherung:
                      0 = gesetzlich krankenversicherte Arbeitnehmer
                      1 = ausschließlich privat krankenversicherte Arbeitnehmer
@@ -158,16 +158,16 @@ int R;
    elektronisches Lohnsteuerabzugsmerkmal festgestellten oder in der
    Bescheinigung für den Lohnsteuerabzug 2022 für den Lohnzahlungszeitraum
    eingetragenen Freibetrags bzw. Hinzurechnungsbetrags in Cent  */
-BigDecimal RE4;
+double RE4;
 /*  Sonstige Bezüge (ohne Vergütung aus mehrjähriger Tätigkeit) einschließlich
    nicht tarifermäßigt zu besteuernde Vorteile bei Vermögensbeteiligungen und
    Sterbegeld bei Versorgungsbezügen sowie Kapitalauszahlungen/Abfindungen,
    soweit es sich nicht um Bezüge für mehrere Jahre handelt, in Cent (ggf. 0) */
-BigDecimal SONSTB;
+double SONSTB;
 /*  Sterbegeld bei Versorgungsbezuegen sowie Kapitalauszahlungen/Abfindungen,
                      soweit es sich nicht um Bezuege fuer mehrere Jahre handelt
                      (in SONSTB enthalten) in Cents  */
-BigDecimal STERBE;
+double STERBE;
 /*  Steuerklasse:
                      1 = I
                      2 = II
@@ -177,32 +177,32 @@ BigDecimal STERBE;
                      6 = VI  */
 int STKL;
 /*  In RE4 enthaltene Versorgungsbezuege in Cents (ggf. 0)  */
-BigDecimal VBEZ;
+double VBEZ;
 /*  Vorsorgungsbezug im Januar 2005 bzw. fuer den ersten vollen Monat
                      in Cents */
-BigDecimal VBEZM;
+double VBEZM;
 /*  Voraussichtliche Sonderzahlungen im Kalenderjahr des Versorgungsbeginns
                      bei Versorgungsempfaengern ohne Sterbegeld,
    Kapitalauszahlungen/Abfindungen bei Versorgungsbezuegen in Cents */
-BigDecimal VBEZS;
+double VBEZS;
 /*  In SONSTB enthaltene Versorgungsbezuege einschliesslich Sterbegeld
                     in Cents (ggf. 0)  */
-BigDecimal VBS;
+double VBS;
 /*  Jahr, in dem der Versorgungsbezug erstmalig gewaehrt wurde; werden
                      mehrere Versorgungsbezuege gezahlt, so gilt der aelteste
    erstmalige Bezug  */
 int VJAHR;
 /*  Kapitalauszahlungen / Abfindungen / Nachzahlungen bei Versorgungsbezügen
                      für mehrere Jahre in Cent (ggf. 0)  */
-BigDecimal VKAPA;
+double VKAPA;
 /*  Entschädigungen und Vergütung für mehrjährige Tätigkeit sowie tarifermäßigt
                              zu besteuernde Vorteile bei Vermögensbeteiligungen
    (§ 19a Absatz 4 Satz 2 EStG) ohne Kapitalauszahlungen und ohne Abfindungen
    bei Versorgungsbezügen in Cent (ggf. 0)  */
-BigDecimal VMT;
+double VMT;
 /*  Zahl der Freibetraege fuer Kinder (eine Dezimalstelle, nur bei Steuerklassen
                      I, II, III und IV)  */
-BigDecimal ZKF;
+double ZKF;
 /*  Zahl der Monate, fuer die Versorgungsbezuege gezahlt werden (nur
                      erforderlich bei Jahresberechnung (LZZ = 1)  */
 int ZMVB;
@@ -210,16 +210,16 @@ int ZMVB;
    besteuernde
                      Vorteile bei Vermögensbeteiligungen (§ 19a Absatz 4 EStG in
    Cent  */
-BigDecimal JRE4ENT = 0.0;
+double JRE4ENT = 0.0;
 /*  In SONSTB enthaltene Entschädigungen nach § 24 Nummer 1 EStG sowie nicht
                      tarifermäßigt zu besteuernde Vorteile bei
    Vermögensbeteiligungen in Cent  */
-BigDecimal SONSTENT = 0.0;
+double SONSTENT = 0.0;
 
 /*   AUSGABEPARAMETER   */
 
 /*  Bemessungsgrundlage fuer die Kirchenlohnsteuer in Cents  */
-BigDecimal BK = (double)0;
+double BK = (double)0;
 /*  Bemessungsgrundlage der sonstigen Bezüge (ohne Vergütung für mehrjährige
    Tätigkeit) für die Kirchenlohnsteuer in Cent. Hinweis: Negativbeträge, die
    aus nicht zu besteuernden Vorteilen bei Vermögensbeteiligungen (§ 19a Absatz
@@ -227,26 +227,26 @@ BigDecimal BK = (double)0;
    Sonderausgabenabzug für tatsächlich erbrachte Vorsorgeaufwendungen
                  im Rahmen der Veranlagung zur Einkommensteuer bleibt unberührt.
  */
-BigDecimal BKS = (double)0;
+double BKS = (double)0;
 /*  Bemessungsgrundlage der Vergütung für mehrjährige Tätigkeit und der
    tarifermäßigt zu besteuernden Vorteile bei Vermögensbeteiligungen für die
    Kirchenlohnsteuer in Cent   */
-BigDecimal BKV = (double)0;
+double BKV = (double)0;
 /*  Fuer den Lohnzahlungszeitraum einzubehaltende Lohnsteuer in Cents  */
-BigDecimal LSTLZZ = (double)0;
+double LSTLZZ = (double)0;
 /*  Fuer den Lohnzahlungszeitraum einzubehaltender Solidaritaetszuschlag
                      in Cents  */
-BigDecimal SOLZLZZ = (double)0;
+double SOLZLZZ = (double)0;
 /*  Solidaritätszuschlag für sonstige Bezüge (ohne Vergütung für mehrjährige
    Tätigkeit in Cent. Hinweis: Negativbeträge, die aus nicht zu besteuernden
    Vorteilen bei Vermögensbeteiligungen (§ 19a Absatz 1 Satz 4 EStG)
    resultieren, mindern SOLZLZZ (maximal bis 0). Der Sonderausgabenabzug für
    tatsächlich erbrachte Vorsorgeaufwendungen im Rahmen der Veranlagung zur
    Einkommensteuer bleibt unberührt.  */
-BigDecimal SOLZS = (double)0;
+double SOLZS = (double)0;
 /*  Solidaritätszuschlag für die Vergütung für mehrjährige Tätigkeit und der
    tarifermäßigt zu besteuernden Vorteile bei Vermögensbeteiligungen in Cent  */
-BigDecimal SOLZV = (double)0;
+double SOLZV = (double)0;
 /*  Lohnsteuer für sonstige Bezüge (ohne Vergütung für mehrjährige Tätigkeit und
    ohne tarifermäßigt zu besteuernde Vorteile bei Vermögensbeteiligungen) in
    Cent Hinweis: Negativbeträge, die aus nicht zu besteuernden Vorteilen bei
@@ -254,10 +254,10 @@ BigDecimal SOLZV = (double)0;
    LSTLZZ (maximal bis 0). Der Sonderausgabenabzug für tatsächlich erbrachte
    Vorsorgeaufwendungen im Rahmen der Veranlagung zur Einkommensteuer bleibt
    unberührt.  */
-BigDecimal STS = (double)0;
+double STS = (double)0;
 /*  Lohnsteuer für die Vergütung für mehrjährige Tätigkeit und der tarifermäßigt
    zu besteuernden Vorteile bei Vermögensbeteiligungen in Cent  */
-BigDecimal STV = (double)0;
+double STV = (double)0;
 /*  Für den Lohnzahlungszeitraum berücksichtigte Beiträge des Arbeitnehmers zur
                                  privaten Basis-Krankenversicherung und privaten
    Pflege-Pflichtversicherung (ggf. auch die Mindestvorsorgepauschale) in Cent
@@ -265,7 +265,7 @@ BigDecimal STV = (double)0;
    einzelnen Ausgabewerte außerhalb des eigentlichen Lohn-
                                  steuerbescheinigungsprogramms zu addieren;
    hinzuzurechnen sind auch die Ausgabewerte VKVSONST  */
-BigDecimal VKVLZZ = (double)0;
+double VKVLZZ = (double)0;
 /*  Für den Lohnzahlungszeitraum berücksichtigte Beiträge des Arbeitnehmers
                                  zur privaten Basis-Krankenversicherung und
    privaten Pflege-Pflichtversicherung (ggf. auch die Mindestvorsorgepauschale)
@@ -273,98 +273,98 @@ BigDecimal VKVLZZ = (double)0;
    tarifermäßigt zu besteuernde Vergütungen für mehrjährige
                                  Tätigkeiten enthält der PAP keinen
    entsprechenden Ausgabewert.  */
-BigDecimal VKVSONST = (double)0;
+double VKVSONST = (double)0;
 
 /*   AUSGABEPARAMETER DBA   */
 
 /*  Verbrauchter Freibetrag bei Berechnung des laufenden Arbeitslohns, in Cent
  */
-BigDecimal VFRB = (double)0;
+double VFRB = (double)0;
 /*  Verbrauchter Freibetrag bei Berechnung des voraussichtlichen
  * Jahresarbeitslohns, in Cent  */
-BigDecimal VFRBS1 = (double)0;
+double VFRBS1 = (double)0;
 /*  Verbrauchter Freibetrag bei Berechnung der sonstigen Bezüge, in Cent  */
-BigDecimal VFRBS2 = (double)0;
+double VFRBS2 = (double)0;
 /*  Für die weitergehende Berücksichtigung des Steuerfreibetrags nach dem DBA
    Türkei verfügbares ZVE über dem Grundfreibetrag bei der Berechnung des
    laufenden Arbeitslohns, in Cent  */
-BigDecimal WVFRB = (double)0;
+double WVFRB = (double)0;
 /*  Für die weitergehende Berücksichtigung des Steuerfreibetrags nach dem DBA
    Türkei verfügbares ZVE über dem Grundfreibetrag bei der Berechnung des
    voraussichtlichen Jahresarbeitslohns, in Cent  */
-BigDecimal WVFRBO = (double)0;
+double WVFRBO = (double)0;
 /*  Für die weitergehende Berücksichtigung des Steuerfreibetrags nach dem DBA
    Türkei verfügbares ZVE über dem Grundfreibetrag bei der Berechnung der
    sonstigen Bezüge, in Cent  */
-BigDecimal WVFRBM = (double)0;
+double WVFRBM = (double)0;
 
 /*   INTERNE FELDER   */
 
 /*  Altersentlastungsbetrag nach Alterseinkünftegesetz in €,
                              Cent (2 Dezimalstellen)  */
-BigDecimal ALTE = (double)0;
+double ALTE = (double)0;
 /*  Arbeitnehmer-Pauschbetrag in EURO  */
-BigDecimal ANP = (double)0;
+double ANP = (double)0;
 /*  Auf den Lohnzahlungszeitraum entfallender Anteil von Jahreswerten
                              auf ganze Cents abgerundet  */
-BigDecimal ANTEIL1 = (double)0;
+double ANTEIL1 = (double)0;
 /*  Bemessungsgrundlage für Altersentlastungsbetrag in €, Cent
                              (2 Dezimalstellen)  */
-BigDecimal BMG = (double)0;
+double BMG = (double)0;
 /*  Beitragsbemessungsgrenze in der gesetzlichen Krankenversicherung
                                 und der sozialen Pflegeversicherung in Euro  */
-BigDecimal BBGKVPV = (double)0;
+double BBGKVPV = (double)0;
 /*   Nach Programmablaufplan 2019  */
-BigDecimal bd = (double)0;
+double bd = (double)0;
 /*  allgemeine Beitragsbemessungsgrenze in der allgemeinen Renten-versicherung
  * in Euro  */
-BigDecimal BBGRV = (double)0;
+double BBGRV = (double)0;
 /*  Differenz zwischen ST1 und ST2 in EURO  */
-BigDecimal DIFF = (double)0;
+double DIFF = (double)0;
 /*  Entlastungsbetrag für Alleinerziehende in Euro
                              Hinweis: Der Entlastungsbetrag für Alleinerziehende
    beträgt ab 2022 4.008 Euro. Der Erhöhungsbetrag von 2.100 Euro, der für die
                              Jahre 2020 und 2021 galt, ist ab 2022 weggefallen
    (Jahressteuergesetz 2020).  */
-BigDecimal EFA = (double)0;
+double EFA = (double)0;
 /*  Versorgungsfreibetrag in €, Cent (2 Dezimalstellen)  */
-BigDecimal FVB = (double)0;
+double FVB = (double)0;
 /*  Versorgungsfreibetrag in €, Cent (2 Dezimalstellen) für die Berechnung
                              der Lohnsteuer für den sonstigen Bezug  */
-BigDecimal FVBSO = (double)0;
+double FVBSO = (double)0;
 /*  Zuschlag zum Versorgungsfreibetrag in EURO  */
-BigDecimal FVBZ = (double)0;
+double FVBZ = (double)0;
 /*  Zuschlag zum Versorgungsfreibetrag in EURO fuer die Berechnung
                              der Lohnsteuer beim sonstigen Bezug  */
-BigDecimal FVBZSO = (double)0;
+double FVBZSO = (double)0;
 /*  Grundfreibetrag in Euro  */
-BigDecimal GFB = (double)0;
+double GFB = (double)0;
 /*  Maximaler Altersentlastungsbetrag in €  */
-BigDecimal HBALTE = (double)0;
+double HBALTE = (double)0;
 /*  Massgeblicher maximaler Versorgungsfreibetrag in €  */
-BigDecimal HFVB = (double)0;
+double HFVB = (double)0;
 /*  Massgeblicher maximaler Zuschlag zum Versorgungsfreibetrag in €,Cent
                              (2 Dezimalstellen)  */
-BigDecimal HFVBZ = (double)0;
+double HFVBZ = (double)0;
 /*  Massgeblicher maximaler Zuschlag zum Versorgungsfreibetrag in €, Cent
                              (2 Dezimalstellen) für die Berechnung der
    Lohnsteuer für den sonstigen Bezug  */
-BigDecimal HFVBZSO = (double)0;
+double HFVBZSO = (double)0;
 /*  Nummer der Tabellenwerte fuer Versorgungsparameter  */
 int J = 0;
 /*  Jahressteuer nach § 51a EStG, aus der Solidaritaetszuschlag und
                              Bemessungsgrundlage fuer die Kirchenlohnsteuer
    ermittelt werden in EURO  */
-BigDecimal JBMG = (double)0;
+double JBMG = (double)0;
 /*  Auf einen Jahreslohn hochgerechneter LZZFREIB in €, Cent
                              (2 Dezimalstellen)  */
-BigDecimal JLFREIB = (double)0;
+double JLFREIB = (double)0;
 /*  Auf einen Jahreslohn hochgerechnete LZZHINZU in €, Cent
                              (2 Dezimalstellen)  */
-BigDecimal JLHINZU = (double)0;
+double JLHINZU = (double)0;
 /*  Jahreswert, dessen Anteil fuer einen Lohnzahlungszeitraum in
                              UPANTEIL errechnet werden soll in Cents  */
-BigDecimal JW = (double)0;
+double JW = (double)0;
 /*  Nummer der Tabellenwerte fuer Parameter bei Altersentlastungsbetrag  */
 int K = 0;
 /*  Merker für Berechnung Lohnsteuer für mehrjährige Tätigkeit.
@@ -373,153 +373,153 @@ int K = 0;
    Tätigkeit 2 = entfällt  */
 int KENNVMT = 0;
 /*  Summe der Freibetraege fuer Kinder in EURO  */
-BigDecimal KFB = (double)0;
+double KFB = (double)0;
 /*  Beitragssatz des Arbeitgebers zur Krankenversicherung  */
-BigDecimal KVSATZAG = (double)0;
+double KVSATZAG = (double)0;
 /*  Beitragssatz des Arbeitnehmers zur Krankenversicherung  */
-BigDecimal KVSATZAN = (double)0;
+double KVSATZAN = (double)0;
 /*  Kennzahl fuer die Einkommensteuer-Tabellenart:
                              1 = Grundtabelle
                              2 = Splittingtabelle  */
 int KZTAB = 0;
 /*  Jahreslohnsteuer in EURO  */
-BigDecimal LSTJAHR = (double)0;
+double LSTJAHR = (double)0;
 /*  Zwischenfelder der Jahreslohnsteuer in Cent  */
-BigDecimal LST1 = (double)0;
-BigDecimal LST2 = (double)0;
-BigDecimal LST3 = (double)0;
-BigDecimal LSTOSO = (double)0;
-BigDecimal LSTSO = (double)0;
+double LST1 = (double)0;
+double LST2 = (double)0;
+double LST3 = (double)0;
+double LSTOSO = (double)0;
+double LSTSO = (double)0;
 /*  Mindeststeuer fuer die Steuerklassen V und VI in EURO  */
-BigDecimal MIST = (double)0;
+double MIST = (double)0;
 /*  Beitragssatz des Arbeitgebers zur Pflegeversicherung  */
-BigDecimal PVSATZAG = (double)0;
+double PVSATZAG = (double)0;
 /*  Beitragssatz des Arbeitnehmers zur Pflegeversicherung  */
-BigDecimal PVSATZAN = (double)0;
+double PVSATZAN = (double)0;
 /*  Beitragssatz des Arbeitnehmers in der allgemeinen gesetzlichen
  * Rentenversicherung (4 Dezimalstellen)   */
-BigDecimal RVSATZAN = (double)0;
+double RVSATZAN = (double)0;
 /*  Rechenwert in Gleitkommadarstellung  */
-BigDecimal RW = (double)0;
+double RW = (double)0;
 /*  Sonderausgaben-Pauschbetrag in EURO  */
-BigDecimal SAP = (double)0;
+double SAP = (double)0;
 /*  Freigrenze fuer den Solidaritaetszuschlag in EURO  */
-BigDecimal SOLZFREI = (double)0;
+double SOLZFREI = (double)0;
 /*  Solidaritaetszuschlag auf die Jahreslohnsteuer in EURO, C (2 Dezimalstellen)
  */
-BigDecimal SOLZJ = (double)0;
+double SOLZJ = (double)0;
 /*  Zwischenwert fuer den Solidaritaetszuschlag auf die Jahreslohnsteuer
                              in EURO, C (2 Dezimalstellen)  */
-BigDecimal SOLZMIN = (double)0;
+double SOLZMIN = (double)0;
 /*  Neu ab 2021: Bemessungsgrundlage des Solidaritätszuschlags zur Prüfung der
  * Freigrenze beim Solidaritätszuschlag für sonstige Bezüge (ohne Vergütung für
  * mehrjährige Tätigkeit) in Euro  */
-BigDecimal SOLZSBMG = (double)0;
+double SOLZSBMG = (double)0;
 /*  Neu ab 2021: Zu versteuerndes Einkommen für die Ermittlung der
  * Bemessungsgrundlage des Solidaritätszuschlags zur Prüfung der Freigrenze beim
  * Solidaritätszuschlag für sonstige Bezüge (ohne Vergütung für mehrjährige
  * Tätigkeit) in Euro, Cent (2 Dezimalstellen)  */
-BigDecimal SOLZSZVE = (double)0;
+double SOLZSZVE = (double)0;
 /*  Neu ab 2021: Bemessungsgrundlage des Solidaritätszuschlags für die Prüfung
  * der Freigrenze beim Solidaritätszuschlag für die Vergütung für mehrjährige
  * Tätigkeit in Euro  */
-BigDecimal SOLZVBMG = (double)0;
+double SOLZVBMG = (double)0;
 /*  Tarifliche Einkommensteuer in EURO  */
-BigDecimal ST = (double)0;
+double ST = (double)0;
 /*  Tarifliche Einkommensteuer auf das 1,25-fache ZX in EURO  */
-BigDecimal ST1 = (double)0;
+double ST1 = (double)0;
 /*  Tarifliche Einkommensteuer auf das 0,75-fache ZX in EURO  */
-BigDecimal ST2 = (double)0;
+double ST2 = (double)0;
 /*  Zwischenfeld zur Ermittlung der Steuer auf Vergütungen für mehrjährige
  * Tätigkeit  */
-BigDecimal STOVMT = (double)0;
+double STOVMT = (double)0;
 /*  Teilbetragssatz der Vorsorgepauschale für die Rentenversicherung (2
  * Dezimalstellen)  */
-BigDecimal TBSVORV = (double)0;
+double TBSVORV = (double)0;
 /*  Bemessungsgrundlage fuer den Versorgungsfreibetrag in Cents  */
-BigDecimal VBEZB = (double)0;
+double VBEZB = (double)0;
 /*  Bemessungsgrundlage für den Versorgungsfreibetrag in Cent für
                              den sonstigen Bezug  */
-BigDecimal VBEZBSO = (double)0;
+double VBEZBSO = (double)0;
 /*  Hoechstbetrag der Vorsorgepauschale nach Alterseinkuenftegesetz in EURO, C
  */
-BigDecimal VHB = (double)0;
+double VHB = (double)0;
 /*  Vorsorgepauschale in EURO, C (2 Dezimalstellen)  */
-BigDecimal VSP = (double)0;
+double VSP = (double)0;
 /*  Vorsorgepauschale nach Alterseinkuenftegesetz in EURO, C  */
-BigDecimal VSPN = (double)0;
+double VSPN = (double)0;
 /*  Zwischenwert 1 bei der Berechnung der Vorsorgepauschale nach
                              dem Alterseinkuenftegesetz in EURO, C (2
    Dezimalstellen)  */
-BigDecimal VSP1 = (double)0;
+double VSP1 = (double)0;
 /*  Zwischenwert 2 bei der Berechnung der Vorsorgepauschale nach
                              dem Alterseinkuenftegesetz in EURO, C (2
    Dezimalstellen)  */
-BigDecimal VSP2 = (double)0;
+double VSP2 = (double)0;
 /*  Vorsorgepauschale mit Teilbeträgen für die gesetzliche Kranken- und
                                          soziale Pflegeversicherung nach
    fiktiven Beträgen oder ggf. für die private Basiskrankenversicherung und
    private Pflege-Pflichtversicherung in Euro, Cent (2 Dezimalstellen)  */
-BigDecimal VSP3 = (double)0;
+double VSP3 = (double)0;
 /*  Erster Grenzwert in Steuerklasse V/VI in Euro  */
-BigDecimal W1STKL5 = (double)0;
+double W1STKL5 = (double)0;
 /*  Zweiter Grenzwert in Steuerklasse V/VI in Euro  */
-BigDecimal W2STKL5 = (double)0;
+double W2STKL5 = (double)0;
 /*  Dritter Grenzwert in Steuerklasse V/VI in Euro  */
-BigDecimal W3STKL5 = (double)0;
+double W3STKL5 = (double)0;
 /*  Hoechstbetrag der Vorsorgepauschale nach § 10c Abs. 2 Nr. 2 EStG in EURO  */
-BigDecimal VSPMAX1 = (double)0;
+double VSPMAX1 = (double)0;
 /*  Hoechstbetrag der Vorsorgepauschale nach § 10c Abs. 2 Nr. 3 EStG in EURO  */
-BigDecimal VSPMAX2 = (double)0;
+double VSPMAX2 = (double)0;
 /*  Vorsorgepauschale nach § 10c Abs. 2 Satz 2 EStG vor der
    Hoechstbetragsberechnung in EURO, C (2 Dezimalstellen)  */
-BigDecimal VSPO = (double)0;
+double VSPO = (double)0;
 /*  Fuer den Abzug nach § 10c Abs. 2 Nrn. 2 und 3 EStG verbleibender
                              Rest von VSPO in EURO, C (2 Dezimalstellen)  */
-BigDecimal VSPREST = (double)0;
+double VSPREST = (double)0;
 /*  Hoechstbetrag der Vorsorgepauschale nach § 10c Abs. 2 Nr. 1 EStG
                              in EURO, C (2 Dezimalstellen)  */
-BigDecimal VSPVOR = (double)0;
+double VSPVOR = (double)0;
 /*  Zu versteuerndes Einkommen gem. § 32a Abs. 1 und 2 EStG €, C
                              (2 Dezimalstellen)  */
-BigDecimal X = (double)0;
+double X = (double)0;
 /*  gem. § 32a Abs. 1 EStG (6 Dezimalstellen)  */
-BigDecimal Y = (double)0;
+double Y = (double)0;
 /*  Auf einen Jahreslohn hochgerechnetes RE4 in €, C (2 Dezimalstellen)
                              nach Abzug der Freibeträge nach § 39 b Abs. 2 Satz
    3 und 4.  */
-BigDecimal ZRE4 = (double)0;
+double ZRE4 = (double)0;
 /*  Auf einen Jahreslohn hochgerechnetes RE4 in €, C (2 Dezimalstellen)  */
-BigDecimal ZRE4J = (double)0;
+double ZRE4J = (double)0;
 /*  Auf einen Jahreslohn hochgerechnetes RE4 in €, C (2 Dezimalstellen)
                              nach Abzug des Versorgungsfreibetrags und des
    Alterentlastungsbetrags zur Berechnung der Vorsorgepauschale in €, Cent (2
    Dezimalstellen)  */
-BigDecimal ZRE4VP = (double)0;
+double ZRE4VP = (double)0;
 /*  Feste Tabellenfreibeträge (ohne Vorsorgepauschale) in €, Cent
                              (2 Dezimalstellen)  */
-BigDecimal ZTABFB = (double)0;
+double ZTABFB = (double)0;
 /*  Auf einen Jahreslohn hochgerechnetes (VBEZ abzueglich FVB) in
                              EURO, C (2 Dezimalstellen)  */
-BigDecimal ZVBEZ = (double)0;
+double ZVBEZ = (double)0;
 /*  Auf einen Jahreslohn hochgerechnetes VBEZ in €, C (2 Dezimalstellen)  */
-BigDecimal ZVBEZJ = (double)0;
+double ZVBEZJ = (double)0;
 /*  Zu versteuerndes Einkommen in €, C (2 Dezimalstellen)  */
-BigDecimal ZVE = (double)0;
+double ZVE = (double)0;
 /*  Zwischenfelder zu X fuer die Berechnung der Steuer nach § 39b
                              Abs. 2 Satz 7 EStG in €  */
-BigDecimal ZX = (double)0;
-BigDecimal ZZX = (double)0;
-BigDecimal HOCH = (double)0;
-BigDecimal VERGL = (double)0;
+double ZX = (double)0;
+double ZZX = (double)0;
+double HOCH = (double)0;
+double VERGL = (double)0;
 /*  Jahreswert der berücksichtigten Beiträge zur privaten
    Basis-Krankenversicherung und
                                           privaten Pflege-Pflichtversicherung
    (ggf. auch die Mindestvorsorgepauschale) in Cent.  */
-BigDecimal VKV = (double)0;
+double VKV = (double)0;
 
 /*  Tabelle fuer die Vomhundertsaetze des Versorgungsfreibetrags  */
-BigDecimal TAB1[] = {
+double TAB1[] = {
     (double)0.0,   (double)0.4,  (double)0.384, (double)0.368, (double)0.352,
     (double)0.336, (double)0.32, (double)0.304, (double)0.288, (double)0.272,
     (double)0.256, (double)0.24, (double)0.224, (double)0.208, (double)0.192,
@@ -529,7 +529,7 @@ BigDecimal TAB1[] = {
     (double)0.048, (double)0.04, (double)0.032, (double)0.024, (double)0.016,
     (double)0.008, (double)0.0};
 /*  Tabelle fuer die Hoechstbetrage des Versorgungsfreibetrags  */
-BigDecimal TAB2[] = {
+double TAB2[] = {
     (double)0,    (double)3000, (double)2880, (double)2760, (double)2640,
     (double)2520, (double)2400, (double)2280, (double)2160, (double)2040,
     (double)1920, (double)1800, (double)1680, (double)1560, (double)1440,
@@ -539,7 +539,7 @@ BigDecimal TAB2[] = {
     (double)360,  (double)300,  (double)240,  (double)180,  (double)120,
     (double)60,   (double)0};
 /*  Tabelle fuer die Zuschlaege zum Versorgungsfreibetrag  */
-BigDecimal TAB3[] = {
+double TAB3[] = {
     (double)0,   (double)900, (double)864, (double)828, (double)792,
     (double)756, (double)720, (double)684, (double)648, (double)612,
     (double)576, (double)540, (double)504, (double)468, (double)432,
@@ -549,7 +549,7 @@ BigDecimal TAB3[] = {
     (double)108, (double)90,  (double)72,  (double)54,  (double)36,
     (double)18,  (double)0};
 /*  Tabelle fuer die Vomhundertsaetze des Altersentlastungsbetrags  */
-BigDecimal TAB4[] = {
+double TAB4[] = {
     (double)0.0,   (double)0.4,  (double)0.384, (double)0.368, (double)0.352,
     (double)0.336, (double)0.32, (double)0.304, (double)0.288, (double)0.272,
     (double)0.256, (double)0.24, (double)0.224, (double)0.208, (double)0.192,
@@ -559,7 +559,7 @@ BigDecimal TAB4[] = {
     (double)0.048, (double)0.04, (double)0.032, (double)0.024, (double)0.016,
     (double)0.008, (double)0.0};
 /*  Tabelle fuer die Hoechstbetraege des Altersentlastungsbetrags  */
-BigDecimal TAB5[] = {
+double TAB5[] = {
     (double)0,    (double)1900, (double)1824, (double)1748, (double)1672,
     (double)1596, (double)1520, (double)1444, (double)1368, (double)1292,
     (double)1216, (double)1140, (double)1064, (double)988,  (double)912,
@@ -568,18 +568,18 @@ BigDecimal TAB5[] = {
     (double)418,  (double)380,  (double)342,  (double)304,  (double)266,
     (double)228,  (double)190,  (double)152,  (double)114,  (double)76,
     (double)38,   (double)0};
-/*  Zahlenkonstanten fuer im Plan oft genutzte BigDecimal Werte  */
-BigDecimal ZAHL1 = 1.0;
-BigDecimal ZAHL2 = (double)2;
-BigDecimal ZAHL5 = (double)5;
-BigDecimal ZAHL7 = (double)7;
-BigDecimal ZAHL12 = (double)12;
-BigDecimal ZAHL100 = (double)100;
-BigDecimal ZAHL360 = (double)360;
-BigDecimal ZAHL500 = (double)500;
-BigDecimal ZAHL700 = (double)700;
-BigDecimal ZAHL1000 = (double)1000;
-BigDecimal ZAHL10000 = (double)10000;
+/*  Zahlenkonstanten fuer im Plan oft genutzte double Werte  */
+double ZAHL1 = 1.0;
+double ZAHL2 = (double)2;
+double ZAHL5 = (double)5;
+double ZAHL7 = (double)7;
+double ZAHL12 = (double)12;
+double ZAHL100 = (double)100;
+double ZAHL360 = (double)360;
+double ZAHL500 = (double)500;
+double ZAHL700 = (double)700;
+double ZAHL1000 = (double)1000;
+double ZAHL10000 = (double)10000;
 
 /*  PROGRAMMABLAUFPLAN, PAP Seite 14  */
 int main() {
@@ -655,27 +655,27 @@ void MPARA() {
  * 16  */
 void MRE4JL() {
   if (LZZ == 1) {
-    ZRE4J = (RE4 / ZAHL100);
-    ZVBEZJ = (VBEZ / ZAHL100);
-    JLFREIB = (LZZFREIB / ZAHL100);
-    JLHINZU = (LZZHINZU / ZAHL100);
+    ZRE4J = round_down(RE4 / ZAHL100, 2);
+    ZVBEZJ = round_down(VBEZ / ZAHL100, 2);
+    JLFREIB = round_down(LZZFREIB / ZAHL100, 2);
+    JLHINZU = round_down(LZZHINZU / ZAHL100, 2);
   } else {
     if (LZZ == 2) {
-      ZRE4J = ((RE4 * ZAHL12) / ZAHL100);
-      ZVBEZJ = ((VBEZ * ZAHL12) / ZAHL100);
-      JLFREIB = ((LZZFREIB * ZAHL12) / ZAHL100);
-      JLHINZU = ((LZZHINZU * ZAHL12) / ZAHL100);
+      ZRE4J = round_down((RE4 * ZAHL12) / ZAHL100, 2);
+      ZVBEZJ = round_down((VBEZ * ZAHL12) / ZAHL100, 2);
+      JLFREIB = round_down((LZZFREIB * ZAHL12) / ZAHL100, 2);
+      JLHINZU = round_down((LZZHINZU * ZAHL12) / ZAHL100, 2);
     } else {
       if (LZZ == 3) {
-        ZRE4J = ((RE4 * ZAHL360) / ZAHL700);
-        ZVBEZJ = ((VBEZ * ZAHL360) / ZAHL700);
-        JLFREIB = ((LZZFREIB * ZAHL360) / ZAHL700);
-        JLHINZU = ((LZZHINZU * ZAHL360) / ZAHL700);
+        ZRE4J = round_down((RE4 * ZAHL360) / ZAHL700, 2);
+        ZVBEZJ = round_down((VBEZ * ZAHL360) / ZAHL700, 2);
+        JLFREIB = round_down((LZZFREIB * ZAHL360) / ZAHL700, 2);
+        JLHINZU = round_down((LZZHINZU * ZAHL360) / ZAHL700, 2);
       } else {
-        ZRE4J = ((RE4 * ZAHL360) / ZAHL100);
-        ZVBEZJ = ((VBEZ * ZAHL360) / ZAHL100);
-        JLFREIB = ((LZZFREIB * ZAHL360) / ZAHL100);
-        JLHINZU = ((LZZHINZU * ZAHL360) / ZAHL100);
+        ZRE4J = round_down((RE4 * ZAHL360) / ZAHL100, 2);
+        ZVBEZJ = round_down((VBEZ * ZAHL360) / ZAHL100, 2);
+        JLFREIB = round_down((LZZFREIB * ZAHL360) / ZAHL100, 2);
+        JLHINZU = round_down((LZZHINZU * ZAHL360) / ZAHL100, 2);
       }
     }
   }
@@ -1089,12 +1089,12 @@ void UPANTEIL() {
     ANTEIL1 = JW;
   } else {
     if (LZZ == 2) {
-      ANTEIL1 = (JW / ZAHL12);
+      ANTEIL1 = round_down(JW / ZAHL12, 0);
     } else {
       if (LZZ == 3) {
-        ANTEIL1 = ((JW * ZAHL7) / ZAHL360);
+        ANTEIL1 = round_down((JW * ZAHL7) / ZAHL360, 0);
       } else {
-        ANTEIL1 = (JW / ZAHL360);
+        ANTEIL1 = round_down(JW / ZAHL360, 0);
       }
     }
   }
@@ -1137,10 +1137,10 @@ void MSONST() {
     /*  lt. PAP:  "Hinweis: negative Zahlen werden nach ihrem Betrag gerundet!"
      */
     /*  Fallunterscheidung bzgl. negativer Zahlen nicht nötig, da die
-     * Java-Klasse BigDecimal.ROUND_DOWN   */
+     * Java-Klasse double.ROUND_DOWN   */
     /*  die Ziffer und nicht die Zahl abrundet, also aus -4.5 wird -4 und
      * aus 4.5 wird 4  */
-    STS = ((((LSTSO - LSTOSO) * f) / ZAHL100) * ZAHL100);
+    STS = (round_down(((LSTSO - LSTOSO) * f) / ZAHL100, 0) * ZAHL100);
     /*  Neu für 2022  */
     STSMIN();
   }
@@ -1205,7 +1205,7 @@ void MSOLZSTS() {
     SOLZSZVE = 0.0;
     X = 0.0;
   } else {
-    X = (SOLZSZVE / KZTAB);
+    X = round_down(SOLZSZVE / KZTAB, 0);
   }
 
   if (STKL < 5)
@@ -1221,7 +1221,7 @@ void MSOLZSTS() {
   if ((SOLZSBMG > SOLZFREI))
   /*  SOLZSBMG > SOLZFREI  */
   {
-    SOLZS = ((STS * 5.5) / ZAHL100);
+    SOLZS = round_down((STS * 5.5) / ZAHL100, 0);
   } else {
     SOLZS = 0.0;
   }
@@ -1266,18 +1266,18 @@ void MVMT() {
                                       lt. PAP muss hier auf ganze EUR abgerundet
          werden. Allerdings muss auch hier der Wert in Cent vorgehalten werden,
                                       weshalb nach dem Aufrunden auf ganze EUR
-         durch 'divide(ZAHL100, 0, BigDecimal.ROUND_DOWN)' wieder die
-         Multiplikation mit 100 erfolgt.
+         durch 'divide(ZAHL100, 0, double.ROUND_DOWN)' wieder die Multiplikation
+         mit 100 erfolgt.
                                */
-      STV = (((STV * f) / ZAHL100) * ZAHL100);
+      STV = (round_down((STV * f) / ZAHL100, 0) * ZAHL100);
     }
 
     /*  Beginn Neu 2021  */
-    SOLZVBMG = ((STV / ZAHL100) + JBMG);
+    SOLZVBMG = (round_down(STV / ZAHL100, 0) + JBMG);
     if ((SOLZVBMG > SOLZFREI))
     /*  SOLZVBMG > SOLZFREI  */
     {
-      SOLZV = ((STV * 5.5) / ZAHL100);
+      SOLZV = round_down((STV * 5.5) / ZAHL100, 0);
     } else {
       SOLZV = 0.0;
     }
@@ -1300,8 +1300,8 @@ void MVMT() {
 void MOSONST() {
   ZRE4J = round_down((JRE4 / ZAHL100), 2);
   ZVBEZJ = round_down((JVBEZ / ZAHL100), 2);
-  JLFREIB = (JFREIB / ZAHL100);
-  JLHINZU = (JHINZU / ZAHL100);
+  JLFREIB = round_down(JFREIB / ZAHL100, 2);
+  JLHINZU = round_down(JHINZU / ZAHL100, 2);
   MRE4();
   MRE4ABZ();
   ZRE4VP = (ZRE4VP - (JRE4ENT / ZAHL100));
@@ -1338,7 +1338,7 @@ void UPTAB22() {
     if ((X < 14927))
     /*  Geändert für 2022  */
     {
-      Y = ((X - GFB) / ZAHL10000);
+      Y = round_down((X - GFB) / ZAHL10000, 6);
       RW = (Y * 1008.7);
       /*  Geändert für 2022  */
       RW = (RW + 1400);
@@ -1347,7 +1347,7 @@ void UPTAB22() {
       if ((X < 58597))
       /*  Geändert für 2022  */
       {
-        Y = ((X - 14926) / ZAHL10000);
+        Y = round_down((X - 14926) / ZAHL10000, 6);
         /*  Geändert für 2022   */
         RW = (Y * 206.43);
         /*  Geändert für 2022  */

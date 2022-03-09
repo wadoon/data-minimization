@@ -32,7 +32,9 @@ class CalcVisitor(arpeggio.PTNodeVisitor):
         return "-" + children[0]
 
     def visit_divide(self, node, children):
-        # TODO more!
+        if len(children)>=2:
+            dir = "up" if children[2] == "BigDecimal.ROUND_UP" else "down"
+            return f"round_{dir}(% / {children[0]}, {children[1]})"
         return "/" + children[0]
 
     def visit_compareTo(self, node, children):
@@ -199,9 +201,11 @@ replace(r'new BigDecimal\((.*)\)', r'(double)\1')
 replace(r'\((.*)\).compareTo\((.*)\) <= (.*)', r'(\1) - \2 <= \3')
 replace(r'(.*).compareTo\((.*)\) <= (.*)', r'\1 - \2 <= \3')
 replace(r'BigDecimal\[\] (.*?) =', r'BigDecimal \1[] =')
+replace(r'BigDecimal', r'double')
 
 print("#include <stdbool.h>")
-print("typedef double BigDecimal;")
+print("#include <assert.h>")
+#print("typedef double BigDecimal;")
 print("""
 double round_up(double value, int digits) {
     assert(digits < 3);
@@ -216,7 +220,7 @@ double round_up(double value, int digits) {
 }
 
 double round_down(double value, int digits) {
-    assert digits < 3;
+    assert(digits < 3);
     if(digits == 0) {
         return (int) value;
     } else  if(digits == 1) {
