@@ -1,11 +1,8 @@
-#ifndef NOHEADER
 #include <assert.h>
 #include <stdbool.h>
-//%HEADER%
-#endif
 
 double round_up(double value, int digits) {
-  //assert(digits < 3);
+  assert(digits < 3);
   if (digits == 0) {
     return (int)value + 1;
   } else if (digits == 1) {
@@ -16,7 +13,7 @@ double round_up(double value, int digits) {
 }
 
 double round_down(double value, int digits) {
-  //assert(digits < 3);
+  assert(digits < 3);
   if (digits == 0) {
     return (int)value;
   } else if (digits == 1) {
@@ -49,6 +46,7 @@ void UPMLST();
 void UPLSTLZZ();
 void UPVKV();
 void UPVKVLZZ();
+void MZTABFB();
 void MLSTJAHR();
 void MLSTJAHR();
 void MZTABFB();
@@ -585,7 +583,6 @@ double ZAHL10000 = (double)10000;
 
 /*  PROGRAMMABLAUFPLAN, PAP Seite 14  */
 int main() {
-  //%INPUT%
   MPARA();
   MRE4JL();
   VBEZBSO = 0.0;
@@ -595,8 +592,6 @@ int main() {
   MBERECH();
   MSONST();
   MVMT();
-
-  //%OUTPUT%
   return 0;
 }
 /*  Zuweisung von Werten für bestimmte Sozialversicherungsparameter  PAP Seite

@@ -1,0 +1,4 @@
+stackprinter~=0.2.5
+PyYAML~=6.0
+Arpeggio~=1.10.2
+pycparser
