@@ -294,9 +294,117 @@ class CBMCPipeline(object):
         self.config['OUTPUTS'] = output['OUTPUTS']
 
 
+class RenameingPrinter(CGenerator):
+    def __init__(self, name_prefix: str):
+        super().__init__(True)
+        self.suffix = name_prefix
+
+    def visit_ID(self, n):
+        return f"{n.name}{self.suffix}"
+
+    def visit_FuncCall(self, n):
+        fref = self._parenthesize_unless_simple(n.name)
+        return fref + '(' + self.visit(n.args) + ')'
+
+    def visit_FuncDef(self, n):
+        return super().visit_FuncDef(n)
+
+    def visit_FuncDecl(self, n):
+        return super().visit_FuncDecl(n)
+
+    def visit_Decl(self, n: c_ast.Decl, no_type=False):
+        nt = n.type
+        if isinstance(nt, c_ast.TypeDecl):
+            nt = c_ast.TypeDecl(nt.declname + self.suffix, nt.quals, nt.align, nt.type, nt.coord)
+        elif isinstance(nt, c_ast.FuncDecl):
+            a = nt.type
+            nt = c_ast.FuncDecl(nt.args,
+                                c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
+                                nt.coord)
+        elif isinstance(nt, c_ast.ArrayDecl):
+            a = nt.type
+            nt = c_ast.ArrayDecl(c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
+                                 nt.dim, nt.dim_quals, nt.coord)
+        else:
+            print("ERROR")
+
+        new = c_ast.Decl(n.name + self.suffix,
+                         n.quals, n.align, n.storage, n.funcspec, nt,
+                         n.init, n.bitsize, n.coord)
+
+        return super().visit_Decl(new, no_type)
+
+
+class CBMCSelfCompPipeline(object):
+    def __init__(self, config, args, filename):
+        self.args = args
+        self.config = config
+        self.filename = filename
+        self.tmpfile = "lohnsteuer_cbmcsc.c"
+        self.smt_file = "lohnsteuer_cbmc.smt2"
+        self.run_command = "cbmc " + self.tmpfile
+
+    def run(self):
+        self.inject()
+        self.execute()
+
+    def inject(self):
+        ast = pycparser.parse_file(self.filename, True, cpp_args="-DNOHEADER=1")
+
+        # known_variables = set(self.config['INPUTS'].keys())
+        # to_1 = {v: f"{v}_1" for v in known_variables}
+        # to_2 = {v: f"{v}_1" for v in known_variables}
+        regex = re.compile(r'\b([A-Z]+)\b')
+
+        def rename(prefix: str, text: str):
+            return regex.sub(r'\1' + prefix, text)
+
+        with open(self.tmpfile, 'w') as fh:
+            fh.write(RenameingPrinter("_1").visit(ast))
+            fh.write(RenameingPrinter("_2").visit(ast))
+            fh.write("void main() {\n")
+
+            for value in self.config['INPUTS'].keys():
+                fh.write(f"\n{value}_1 = nondet_double();")
+                fh.write(f"\n{value}_2 = nondet_double();")
+
+            for (idx, value) in enumerate(self.config['FACTS']):
+                fh.write(f"\n    // FACT {idx}")
+                fh.write(f"\n    __CPROVER_assume(({rename('_1', value)}) == ({rename('_2', value)}));")
+
+            if self.args.eqin:
+                for value in self.config['INPUTS'].keys():
+                    fh.write(f"\n    __CPROVER_assume({value}_1 == {value}_2);")
+                for value in self.config['INTERNALS'].keys():
+                    fh.write(f"\n    __CPROVER_assume({value}_1 == {value}_2);")
+
+            main_fn: c_ast.FuncDef = find(lambda x: isinstance(x, c_ast.FuncDef) and x.decl.name == "main", ast.ext)
+            body = main_fn.body.block_items
+            for idx, statement in enumerate(body):
+                fh.write(RenameingPrinter("_1").visit(statement))
+                fh.write(";\n")
+                fh.write(RenameingPrinter("_2").visit(statement))
+                fh.write(";\n")
+                for name in self.config['OUTPUTS'].keys():
+                    fh.write(f"\n    __CPROVER_assert({name}_1 == {name}_2, \"Output {name} mismatch after {idx}\");")
+
+            # fh.write("    main_1(); main_2();\n")
+
+            fh.write("\n}")
+
+        print(f"Run clang-format -i {self.tmpfile}")
+        os.system(f"clang-format -i {self.tmpfile}")
+
+    def execute(self):
+        print("Run CBMC solver: ", self.run_command)
+        #output = os.system(self.run_command)
+        #sys.exit(output)
+
+
 def get_cli():
     a = argparse.ArgumentParser()
     a.add_argument("--mode")
+    a.add_argument("--eqin", default=True)
     a.add_argument("config")
     a.add_argument("program")
     return a
@@ -313,6 +421,8 @@ if __name__ == "__main__":
         pipeline = CBMCPipeline(config, args.program)
     elif args.mode == 'facts':
         pipeline = ExtractFacts(config, args.program)
+    elif args.mode == 'selfcomp':
+        pipeline = CBMCSelfCompPipeline(config, args, args.program)
     else:
         pipeline = ExecutePipeline(config, args.program)
 

@@ -1,4 +1,6 @@
 import re
+import sys
+
 import arpeggio
 import re
 
@@ -32,7 +34,7 @@ class CalcVisitor(arpeggio.PTNodeVisitor):
         return "-" + children[0]
 
     def visit_divide(self, node, children):
-        if len(children)>=2:
+        if len(children) >= 2:
             dir = "up" if children[2] == "BigDecimal.ROUND_UP" else "down"
             return f"round_{dir}(% / {children[0]}, {children[1]})"
         return "/" + children[0]
@@ -131,14 +133,11 @@ class CalcVisitor(arpeggio.PTNodeVisitor):
         return children[0]
 
 
-with open("2022.xml") as fh:
-    text = fh.read()
-
-
 def replace(regex, replacement):
     global text
     r = re.compile(regex, re.DOTALL)
     text = re.sub(regex, replacement, text)
+
 
 def translateExpr(x):
     v = parse(x.group(1))
@@ -155,6 +154,12 @@ def parse(value):
     result = arpeggio.visit_parse_tree(structure, CalcVisitor(debug=False))
     # print(structure)
     return result
+
+
+mode = sys.argv[1] == "int"
+
+with open("2022.xml") as fh:
+    text = fh.read()
 
 replace(r'<!--', r'/*')
 replace(r'-->', r'*/')
@@ -188,8 +193,8 @@ replace(r'<INTERNALS>', '')
 replace(r'</INTERNALS>', '')
 replace(r'</VARIABLES>', '')
 replace(r'<METHODS>', '')
-replace(r'<MAIN>', 'int main() {')
-replace(r'</MAIN>', 'return 0; }')
+replace(r'<MAIN>', "int main() {\n   //%INPUT%")
+replace(r'</MAIN>', "//%OUTPUT%\nreturn 0; }")
 replace(r'<EXECUTE method="(.*)"/>', r'\1();')
 replace(r'<PAP name="Lohnsteuer2022Big" version="1.0" versionNummer="1.0">', '')
 replace(r'<VARIABLES>', '')
@@ -198,15 +203,36 @@ replace(r'BigDecimal.ZERO', '0.0')
 replace(r'BigDecimal.ONE', '1.0')
 replace(r'BigDecimal\.valueOf\s*\(([0-9.]*)\)', r'(double)\1')
 replace(r'new BigDecimal\((.*)\)', r'(double)\1')
-replace(r'\((.*)\).compareTo\((.*)\) <= (.*)', r'(\1) - \2 <= \3')
-replace(r'(.*).compareTo\((.*)\) <= (.*)', r'\1 - \2 <= \3')
+# replace(r'\((.*)\).compareTo\((.*)\) <= (.*)', r'(\1) - \2 <= \3')
+# replace(r'(.*).compareTo\((.*)\) <= (.*)', r'\1 - \2 <= \3')
 replace(r'BigDecimal\[\] (.*?) =', r'BigDecimal \1[] =')
 replace(r'BigDecimal', r'double')
 
-print("#include <stdbool.h>")
-print("#include <assert.h>")
-#print("typedef double BigDecimal;")
+if mode:
+    replace(r'\bdouble\b', 'int')
+    replace(r'_double', '_int')
+    replace(r'\b\d+(\.\d*)?\b', lambda x: str(int(float(x.group()) * 1000)))
+
 print("""
+#ifndef NOHEADER
+#include <assert.h>
+#include <stdbool.h>
+//%HEADER%
+#endif
+""")
+
+if mode:
+    print("""
+    int round_up(int value, int digits) {
+        return value;
+    }
+
+    int round_down(int value, int digits) {
+        return value;
+    }
+    """)
+else:
+    print("""
 double round_up(double value, int digits) {
     assert(digits < 3);
     if(digits == 0) {
@@ -229,7 +255,9 @@ double round_down(double value, int digits) {
         return (int) (100*value)/100;
     }
 }
+""")
 
+print("""
 void MPARA(); void MRE4JL(); void MSOLZSTS();
 void MRE4(); void MRE4ABZ(); void MBERECH();
 void MSONST(); void MVMT(); void MOSONST();
@@ -245,20 +273,18 @@ void MLSTJAHR(); void MZTABFB(); void MRE4ALTE();
 """)
 print(text)
 
-
-def test(input, expected):
-    actual = parse(input)
-    if actual.replace(' ', '') != expected.replace(' ', ''):
-        print("ACTUAL:   ", actual)
-        print("EXPRECTED:", expected)
-        raise AssertionError()
-
-
-test("ZRE4.subtract(ZVBEZ).compareTo(ZAHL1000) == -1", "((ZRE4-ZVBEZ) < ZAHL1000)")
-test("ANP = ANP.add(ZRE4).subtract(ZVBEZ).setScale(0,BigDecimal.ROUND_UP)",
-     "ANP=round_up(((ANP + ZRE4) - ZVBEZ),0)")
-
-test("BigDecimal.valueOf(5.5).divide(ZAHL100)", "(5.5/ZAHL100)")
-
-test("SOLZLZZ = SOLZLZZ.add(STS.multiply(BigDecimal.valueOf(5.5).divide(ZAHL100))).setScale(0, BigDecimal.ROUND_DOWN)",
-     "SOLZLZZ = round_down((SOLZLZZ+(STS*(5.5/ZAHL100))), 0)")
+# def test(input, expected):
+#     actual = parse(input)
+#     if actual.replace(' ', '') != expected.replace(' ', ''):
+#         print("ACTUAL:   ", actual)
+#         print("EXPRECTED:", expected)
+#         raise AssertionError()
+#
+# test("ZRE4.subtract(ZVBEZ).compareTo(ZAHL1000) == -1", "((ZRE4-ZVBEZ) < ZAHL1000)")
+# test("ANP = ANP.add(ZRE4).subtract(ZVBEZ).setScale(0,BigDecimal.ROUND_UP)",
+#      "ANP=round_up(((ANP + ZRE4) - ZVBEZ),0)")
+#
+# test("BigDecimal.valueOf(5.5).divide(ZAHL100)", "(5.5/ZAHL100)")
+#
+# test("SOLZLZZ = SOLZLZZ.add(STS.multiply(BigDecimal.valueOf(5.5).divide(ZAHL100))).setScale(0, BigDecimal.ROUND_DOWN)",
+#      "SOLZLZZ = round_down((SOLZLZZ+(STS*(5.5/ZAHL100))), 0)")
