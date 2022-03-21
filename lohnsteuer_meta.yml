@@ -1,0 +1,725 @@
+FACTS:
+- AJAHR==1
+- AJAHR<=1
+- AJAHR>=1
+- ALTER1==1
+- ALTER1<=1
+- ALTER1>=1
+- ENTSCH==1
+- ENTSCH<=1
+- ENTSCH>=1
+- JFREIB==1
+- JFREIB<=1
+- JFREIB>=1
+- JHINZU==1
+- JHINZU<=1
+- JHINZU>=1
+- JRE4==1
+- JRE4<=1
+- JRE4>=1
+- JRE4ENT==1
+- JRE4ENT<=1
+- JRE4ENT>=1
+- JVBEZ==1
+- JVBEZ<=1
+- JVBEZ>=1
+- KRV==1
+- KRV<=1
+- KRV>=1
+- KVZ==1
+- KVZ<=1
+- KVZ>=1
+- LZZ==1
+- LZZ<=1
+- LZZ>=1
+- LZZFREIB==1
+- LZZFREIB<=1
+- LZZFREIB>=1
+- LZZHINZU==1
+- LZZHINZU<=1
+- LZZHINZU>=1
+- MBV==1
+- MBV<=1
+- MBV>=1
+- PKPV==1
+- PKPV<=1
+- PKPV>=1
+- PKV==1
+- PKV<=1
+- PKV>=1
+- PVS==1
+- PVS<=1
+- PVS>=1
+- PVZ==1
+- PVZ<=1
+- PVZ>=1
+- R==1
+- R<=1
+- R>=1
+- RE4==1
+- RE4<=1
+- RE4>=1
+- SONSTB==1
+- SONSTB<=1
+- SONSTB>=1
+- SONSTENT==1
+- SONSTENT<=1
+- SONSTENT>=1
+- STERBE==1
+- STERBE<=1
+- STERBE>=1
+- STKL==1
+- STKL<=1
+- STKL>=1
+- VBEZ==1
+- VBEZ<=1
+- VBEZ>=1
+- VBEZM==1
+- VBEZM<=1
+- VBEZM>=1
+- VBEZS==1
+- VBEZS<=1
+- VBEZS>=1
+- VBS==1
+- VBS<=1
+- VBS>=1
+- VJAHR==1
+- VJAHR<=1
+- VJAHR>=1
+- VKAPA==1
+- VKAPA<=1
+- VKAPA>=1
+- VMT==1
+- VMT<=1
+- VMT>=1
+- ZKF==1
+- ZKF<=1
+- ZKF>=1
+- ZMVB==1
+- ZMVB<=1
+- ZMVB>=1
+- af==1
+- af<=1
+- af>=1
+- f==1
+- f<=1
+- f>=1
+- KRV < 2000
+- KRV == 0
+- PVS == 1000
+- PVZ == 1000
+- LZZ == 1000
+- LZZ == 2000
+- LZZ == 3000
+- af == 0
+- VJAHR < 2006000
+- VJAHR < 2040000
+- VJAHR + (-(-(+(-2004000))))
+- LZZ == 1000
+- (VBEZM * ZMVB) + VBEZS
+- VBEZM * ZMVB
+- ALTER1 == 0
+- AJAHR < 2006000
+- AJAHR < 2040000
+- AJAHR + (-(-(+(-2004000))))
+- ZKF > 0
+- STKL < 6000
+- STKL < 6000
+- STKL == 1000
+- ZKF * 8388000
+- STKL == 2000
+- ZKF * 8388000
+- STKL == 3000
+- ZKF * 8388000
+- STKL == 4000
+- ZKF * 4194000
+- STKL == 5000
+- VMT + VKAPA
+- PKV > 0
+- STKL < 5000
+- KRV > 1000
+- STKL == 3000
+- PKV > 0
+- STKL == 6000
+- PKV == 2000
+- R > 0
+- LZZ == 1000
+- LZZ == 2000
+- LZZ == 3000
+- ZMVB == 0
+- (SONSTB == 0) && (MBV == 0)
+- SONSTB == 0
+- MBV == 0
+- JRE4 + SONSTB
+- JVBEZ + VBS
+- MBV == 0
+- R > 0
+- ZKF > 0
+- STKL < 5000
+- VKAPA < 0
+- (VMT + VKAPA) > 0
+- VMT + VKAPA
+- STERBE + VKAPA
+- ((JRE4 + SONSTB) + VMT) + VKAPA
+- (JRE4 + SONSTB) + VMT
+- JRE4 + SONSTB
+- (JVBEZ + VBS) + VKAPA
+- JVBEZ + VBS
+- R > 0
+- f == 0
+- f < 0
+- f > 0
+- f == 1000
+- f < 1000
+- f > 1000
+- af == 0
+- af < 0
+- af > 0
+- af == 1000
+- af < 1000
+- af > 1000
+- LZZ == 1000
+- LZZ < 1000
+- LZZ > 1000
+- VKAPA == 0
+- VKAPA < 0
+- VKAPA > 0
+- ZMVB == 0
+- ZMVB < 0
+- ZMVB > 0
+- ZMVB == 12000
+- ZMVB < 12000
+- ZMVB > 12000
+- SONSTB == 0
+- SONSTB < 0
+- SONSTB > 0
+- MBV == 0
+- MBV < 0
+- MBV > 0
+- R == 0
+- R < 0
+- R > 0
+- VMT == 0
+- VMT < 0
+- VMT > 0
+- SONSTB == 1000
+- SONSTB < 1000
+- SONSTB > 1000
+- MBV == 1000
+- MBV < 1000
+- MBV > 1000
+- LZZ == 0
+- LZZ < 0
+- LZZ > 0
+- ZKF == 0
+- ZKF < 0
+- ZKF > 0
+- VMT == 5500
+- VMT < 5500
+- VMT > 5500
+- VKAPA == 5500
+- VKAPA < 5500
+- VKAPA > 5500
+- LZZ == 2000
+- LZZ < 2000
+- LZZ > 2000
+- PKV == 0
+- PKV < 0
+- PKV > 0
+- STKL == 6000
+- STKL < 6000
+- STKL > 6000
+- STKL == 1000
+- STKL < 1000
+- STKL > 1000
+- STKL == 0
+- STKL < 0
+- STKL > 0
+- LZZ == 6000
+- LZZ < 6000
+- LZZ > 6000
+- VMT == 6000
+- VMT < 6000
+- VMT > 6000
+- VKAPA == 6000
+- VKAPA < 6000
+- VKAPA > 6000
+- SONSTB == 6000
+- SONSTB < 6000
+- SONSTB > 6000
+- MBV == 6000
+- MBV < 6000
+- MBV > 6000
+- ALTER1 == 0
+- ALTER1 < 0
+- ALTER1 > 0
+- R == 1000
+- R < 1000
+- R > 1000
+- R == 2000
+- R < 2000
+- R > 2000
+- ZKF == 1000
+- ZKF < 1000
+- ZKF > 1000
+- ZKF == 2000
+- ZKF < 2000
+- ZKF > 2000
+- KRV == 2000
+- KRV < 2000
+- KRV > 2000
+- KRV == 0
+- KRV < 0
+- KRV > 0
+- KRV == 84600000
+- KRV < 84600000
+- KRV > 84600000
+- KRV == 81000000
+- KRV < 81000000
+- KRV > 81000000
+- VMT == 1000
+- VMT < 1000
+- VMT > 1000
+- VMT == 5000
+- VMT < 5000
+- VMT > 5000
+- VKAPA == 1000
+- VKAPA < 1000
+- VKAPA > 1000
+- VKAPA == 5000
+- VKAPA < 5000
+- VKAPA > 5000
+- STKL == 5000
+- STKL < 5000
+- STKL > 5000
+- SONSTB == 5000
+- SONSTB < 5000
+- SONSTB > 5000
+- MBV == 5000
+- MBV < 5000
+- MBV > 5000
+- ZKF == 5000
+- ZKF < 5000
+- ZKF > 5000
+- VMT == 2000
+- VMT < 2000
+- VMT > 2000
+- VKAPA == 2000
+- VKAPA < 2000
+- VKAPA > 2000
+- STKL == 2000
+- STKL < 2000
+- STKL > 2000
+- SONSTB == 2000
+- SONSTB < 2000
+- SONSTB > 2000
+- MBV == 2000
+- MBV < 2000
+- MBV > 2000
+- JVBEZ == 0
+- JVBEZ < 0
+- JVBEZ > 0
+- VBS == 0
+- VBS < 0
+- VBS > 0
+- JVBEZ == 1000
+- JVBEZ < 1000
+- JVBEZ > 1000
+- VBS == 1000
+- VBS < 1000
+- VBS > 1000
+- VMT == 2006000
+- VMT < 2006000
+- VMT > 2006000
+- VKAPA == 2006000
+- VKAPA < 2006000
+- VKAPA > 2006000
+- JVBEZ == 2006000
+- JVBEZ < 2006000
+- JVBEZ > 2006000
+- VBS == 2006000
+- VBS < 2006000
+- VBS > 2006000
+- VJAHR == 0
+- VJAHR < 0
+- VJAHR > 0
+- VJAHR == 2006000
+- VJAHR < 2006000
+- VJAHR > 2006000
+- SONSTB == 2006000
+- SONSTB < 2006000
+- SONSTB > 2006000
+- MBV == 2006000
+- MBV < 2006000
+- MBV > 2006000
+- JFREIB == 0
+- JFREIB < 0
+- JFREIB > 0
+- JFREIB == 1000
+- JFREIB < 1000
+- JFREIB > 1000
+- JHINZU == 0
+- JHINZU < 0
+- JHINZU > 0
+- JHINZU == 1000
+- JHINZU < 1000
+- JHINZU > 1000
+- ALTER1 == 2006000
+- ALTER1 < 2006000
+- ALTER1 > 2006000
+- AJAHR == 0
+- AJAHR < 0
+- AJAHR > 0
+- AJAHR == 2006000
+- AJAHR < 2006000
+- AJAHR > 2006000
+- VMT == 8388000
+- VMT < 8388000
+- VMT > 8388000
+- VKAPA == 8388000
+- VKAPA < 8388000
+- VKAPA > 8388000
+- STKL == 8388000
+- STKL < 8388000
+- STKL > 8388000
+- ZKF == 8388000
+- ZKF < 8388000
+- ZKF > 8388000
+- SONSTB == 8388000
+- SONSTB < 8388000
+- SONSTB > 8388000
+- MBV == 8388000
+- MBV < 8388000
+- MBV > 8388000
+- KVZ == 2000
+- KVZ < 2000
+- KVZ > 2000
+- KVZ == 70
+- KVZ < 70
+- KVZ > 70
+- af == 5000
+- af < 5000
+- af > 5000
+- f == 5000
+- f < 5000
+- f > 5000
+- PVS == 1000
+- PVS < 1000
+- PVS > 1000
+- PVS == 10
+- PVS < 10
+- PVS > 10
+- PVS == 15
+- PVS < 15
+- PVS > 15
+- PVZ == 1000
+- PVZ < 1000
+- PVZ > 1000
+- PVZ == 3
+- PVZ < 3
+- PVZ > 3
+- PVZ == 20
+- PVZ < 20
+- PVZ > 20
+- PVZ == 15
+- PVZ < 15
+- PVZ > 15
+- PVS == 3
+- PVS < 3
+- PVS > 3
+- PVS == 20
+- PVS < 20
+- PVS > 20
+- KRV == 93
+- KRV < 93
+- KRV > 93
+- VMT == 36000
+- VMT < 36000
+- VMT > 36000
+- VKAPA == 36000
+- VKAPA < 36000
+- VKAPA > 36000
+- STKL == 36000
+- STKL < 36000
+- STKL > 36000
+- SONSTB == 36000
+- SONSTB < 36000
+- SONSTB > 36000
+- MBV == 36000
+- MBV < 36000
+- MBV > 36000
+- STKL == 16956000
+- STKL < 16956000
+- STKL > 16956000
+- ZKF == 16956000
+- ZKF < 16956000
+- ZKF > 16956000
+- ZKF == 11900
+- ZKF < 11900
+- ZKF > 11900
+- ZKF == 5500
+- ZKF < 5500
+- ZKF > 5500
+- f == 16956000
+- f < 16956000
+- f > 16956000
+- f == 11900
+- f < 11900
+- f > 11900
+- f == 5500
+- f < 5500
+- f > 5500
+- STKL == 11900
+- STKL < 11900
+- STKL > 11900
+- STKL == 5500
+- STKL < 5500
+- STKL > 5500
+- KRV == 880
+- KRV < 880
+- KRV > 880
+- STERBE == 0
+- STERBE < 0
+- STERBE > 0
+- VMT == 3000
+- VMT < 3000
+- VMT > 3000
+- VMT == 3000000
+- VMT < 3000000
+- VMT > 3000000
+- VMT == 1900000
+- VMT < 1900000
+- VMT > 1900000
+- VKAPA == 3000
+- VKAPA < 3000
+- VKAPA > 3000
+- VKAPA == 3000000
+- VKAPA < 3000000
+- VKAPA > 3000000
+- VKAPA == 1900000
+- VKAPA < 1900000
+- VKAPA > 1900000
+- STKL == 3000
+- STKL < 3000
+- STKL > 3000
+- STKL == 3000000
+- STKL < 3000000
+- STKL > 3000000
+- STKL == 1900000
+- STKL < 1900000
+- STKL > 1900000
+- SONSTB == 3000
+- SONSTB < 3000
+- SONSTB > 3000
+- SONSTB == 3000000
+- SONSTB < 3000000
+- SONSTB > 3000000
+- SONSTB == 1900000
+- SONSTB < 1900000
+- SONSTB > 1900000
+- MBV == 3000
+- MBV < 3000
+- MBV > 3000
+- MBV == 3000000
+- MBV < 3000000
+- MBV > 3000000
+- MBV == 1900000
+- MBV < 1900000
+- MBV > 1900000
+- ZKF == 3000
+- ZKF < 3000
+- ZKF > 3000
+- ZKF == 3000000
+- ZKF < 3000000
+- ZKF > 3000000
+- ZKF == 1900000
+- ZKF < 1900000
+- ZKF > 1900000
+- KRV == 1000
+- KRV < 1000
+- KRV > 1000
+- VMT == 120
+- VMT < 120
+- VMT > 120
+- VKAPA == 120
+- VKAPA < 120
+- VKAPA > 120
+- STKL == 120
+- STKL < 120
+- STKL > 120
+- SONSTB == 120
+- SONSTB < 120
+- SONSTB > 120
+- MBV == 120
+- MBV < 120
+- MBV > 120
+- ZKF == 120
+- ZKF < 120
+- ZKF > 120
+- PKV == 6000
+- PKV < 6000
+- PKV > 6000
+- ZKF == 6000
+- ZKF < 6000
+- ZKF > 6000
+- JRE4 == 0
+- JRE4 < 0
+- JRE4 > 0
+- JRE4 == 1000
+- JRE4 < 1000
+- JRE4 > 1000
+- VMT == 58050000
+- VMT < 58050000
+- VMT > 58050000
+- VKAPA == 58050000
+- VKAPA < 58050000
+- VKAPA > 58050000
+- KRV == 58050000
+- KRV < 58050000
+- KRV > 58050000
+- SONSTB == 58050000
+- SONSTB < 58050000
+- SONSTB > 58050000
+- MBV == 58050000
+- MBV < 58050000
+- MBV > 58050000
+- ZKF == 58050000
+- ZKF < 58050000
+- ZKF > 58050000
+INPUTS:
+  AJAHR: 1
+  ALTER1: 1
+  ENTSCH: 1
+  JFREIB: 1
+  JHINZU: 1
+  JRE4: 1
+  JRE4ENT: 1
+  JVBEZ: 1
+  KRV: 1
+  KVZ: 1
+  LZZ: 1
+  LZZFREIB: 1
+  LZZHINZU: 1
+  MBV: 1
+  PKPV: 1
+  PKV: 1
+  PVS: 1
+  PVZ: 1
+  R: 1
+  RE4: 1
+  SONSTB: 1
+  SONSTENT: 1
+  STERBE: 1
+  STKL: 1
+  VBEZ: 1
+  VBEZM: 1
+  VBEZS: 1
+  VBS: 1
+  VJAHR: 1
+  VKAPA: 1
+  VMT: 1
+  ZKF: 1
+  ZMVB: 1
+  af: 1
+  f: 1
+INTERNALS:
+  ALTE: null
+  ANP: null
+  ANTEIL1: null
+  BBGKVPV: null
+  BBGRV: null
+  BMG: null
+  DIFF: null
+  EFA: null
+  FVB: null
+  FVBSO: null
+  FVBZ: null
+  FVBZSO: null
+  GFB: null
+  HBALTE: null
+  HFVB: null
+  HFVBZ: null
+  HFVBZSO: null
+  HOCH: null
+  J: null
+  JBMG: null
+  JLFREIB: null
+  JLHINZU: null
+  JW: null
+  K: null
+  KENNVMT: null
+  KFB: null
+  KVSATZAG: null
+  KVSATZAN: null
+  KZTAB: null
+  LST1: null
+  LST2: null
+  LST3: null
+  LSTJAHR: null
+  LSTOSO: null
+  LSTSO: null
+  MIST: null
+  PVSATZAG: null
+  PVSATZAN: null
+  RVSATZAN: null
+  RW: null
+  SAP: null
+  SOLZFREI: null
+  SOLZJ: null
+  SOLZMIN: null
+  SOLZSBMG: null
+  SOLZSZVE: null
+  SOLZVBMG: null
+  ST: null
+  ST1: null
+  ST2: null
+  STOVMT: null
+  TBSVORV: null
+  VBEZB: null
+  VBEZBSO: null
+  VERGL: null
+  VHB: null
+  VKV: null
+  VSP: null
+  VSP1: null
+  VSP2: null
+  VSP3: null
+  VSPMAX1: null
+  VSPMAX2: null
+  VSPN: null
+  VSPO: null
+  VSPREST: null
+  VSPVOR: null
+  W1STKL5: null
+  W2STKL5: null
+  W3STKL5: null
+  X: null
+  Y: null
+  ZRE4: null
+  ZRE4J: null
+  ZRE4VP: null
+  ZTABFB: null
+  ZVBEZ: null
+  ZVBEZJ: null
+  ZVE: null
+  ZX: null
+  ZZX: null
+  bd: null
+OUTPUTS:
+  BK: 0.0
+  BKS: 0.0
+  BKV: 0.0
+  LSTLZZ: 0.0
+  SOLZLZZ: 0.0
+  SOLZS: 0.0
+  SOLZV: 0.0
+  STS: 0.0
+  STV: 0.0
+  VFRB: 0.0
+  VFRBS1: 0.0
+  VFRBS2: 0.0
+  VKVLZZ: 12.0
+  VKVSONST: 0.0
+  WVFRB: 0.0
+  WVFRBM: 0.0
+  WVFRBO: 0.0

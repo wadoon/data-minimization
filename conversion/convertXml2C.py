@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import re
 import sys
 
@@ -212,6 +214,7 @@ if mode:
     replace(r'\bdouble\b', 'int')
     replace(r'_double', '_int')
     replace(r'\b\d+(\.\d*)?\b', lambda x: str(int(float(x.group()) * 1000)))
+    replace(r'round_(up|down)\((.*), \d+\)', r'\2')
 
 print("""
 #ifndef NOHEADER
@@ -223,13 +226,6 @@ print("""
 
 if mode:
     print("""
-    int round_up(int value, int digits) {
-        return value;
-    }
-
-    int round_down(int value, int digits) {
-        return value;
-    }
     """)
 else:
     print("""

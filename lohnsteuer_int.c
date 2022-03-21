@@ -5,10 +5,6 @@
 //%HEADER%
 #endif
 
-int round_up(int value, int digits) { return value; }
-
-int round_down(int value, int digits) { return value; }
-
 void MPARA();
 void MRE4JL();
 void MSOLZSTS();
@@ -640,27 +636,27 @@ void MPARA() {
  * PAP Seite 16000  */
 void MRE4JL() {
   if (LZZ == 1000) {
-    ZRE4J = round_down(RE4 / ZAHL100, 2000);
-    ZVBEZJ = round_down(VBEZ / ZAHL100, 2000);
-    JLFREIB = round_down(LZZFREIB / ZAHL100, 2000);
-    JLHINZU = round_down(LZZHINZU / ZAHL100, 2000);
+    ZRE4J = RE4 / ZAHL100;
+    ZVBEZJ = VBEZ / ZAHL100;
+    JLFREIB = LZZFREIB / ZAHL100;
+    JLHINZU = LZZHINZU / ZAHL100;
   } else {
     if (LZZ == 2000) {
-      ZRE4J = round_down((RE4 * ZAHL12) / ZAHL100, 2000);
-      ZVBEZJ = round_down((VBEZ * ZAHL12) / ZAHL100, 2000);
-      JLFREIB = round_down((LZZFREIB * ZAHL12) / ZAHL100, 2000);
-      JLHINZU = round_down((LZZHINZU * ZAHL12) / ZAHL100, 2000);
+      ZRE4J = (RE4 * ZAHL12) / ZAHL100;
+      ZVBEZJ = (VBEZ * ZAHL12) / ZAHL100;
+      JLFREIB = (LZZFREIB * ZAHL12) / ZAHL100;
+      JLHINZU = (LZZHINZU * ZAHL12) / ZAHL100;
     } else {
       if (LZZ == 3000) {
-        ZRE4J = round_down((RE4 * ZAHL360) / ZAHL700, 2000);
-        ZVBEZJ = round_down((VBEZ * ZAHL360) / ZAHL700, 2000);
-        JLFREIB = round_down((LZZFREIB * ZAHL360) / ZAHL700, 2000);
-        JLHINZU = round_down((LZZHINZU * ZAHL360) / ZAHL700, 2000);
+        ZRE4J = (RE4 * ZAHL360) / ZAHL700;
+        ZVBEZJ = (VBEZ * ZAHL360) / ZAHL700;
+        JLFREIB = (LZZFREIB * ZAHL360) / ZAHL700;
+        JLHINZU = (LZZHINZU * ZAHL360) / ZAHL700;
       } else {
-        ZRE4J = round_down((RE4 * ZAHL360) / ZAHL100, 2000);
-        ZVBEZJ = round_down((VBEZ * ZAHL360) / ZAHL100, 2000);
-        JLFREIB = round_down((LZZFREIB * ZAHL360) / ZAHL100, 2000);
-        JLHINZU = round_down((LZZHINZU * ZAHL360) / ZAHL100, 2000);
+        ZRE4J = (RE4 * ZAHL360) / ZAHL100;
+        ZVBEZJ = (VBEZ * ZAHL360) / ZAHL100;
+        JLFREIB = (LZZFREIB * ZAHL360) / ZAHL100;
+        JLHINZU = (LZZHINZU * ZAHL360) / ZAHL100;
       }
     }
   }
@@ -693,12 +689,12 @@ void MRE4() {
       HFVB = TAB2[J];
       FVBZ = TAB3[J];
     } else {
-      VBEZB = round_down(((VBEZM * ZAHL12) + VBEZS), 2000);
+      VBEZB = ((VBEZM * ZAHL12) + VBEZS);
       HFVB = TAB2[J];
       FVBZ = TAB3[J];
     }
 
-    FVB = round_up(((VBEZB * TAB1[J]) / ZAHL100), 2000);
+    FVB = ((VBEZB * TAB1[J]) / ZAHL100);
     if ((FVB > HFVB)) {
       FVB = HFVB;
     }
@@ -707,24 +703,24 @@ void MRE4() {
       FVB = ZVBEZJ;
     }
 
-    FVBSO = round_up((FVB + ((VBEZBSO * TAB1[J]) / ZAHL100)), 2000);
+    FVBSO = (FVB + ((VBEZBSO * TAB1[J]) / ZAHL100));
     if ((FVBSO > TAB2[J])) {
       FVBSO = TAB2[J];
     }
 
-    HFVBZSO = round_down((((VBEZB + VBEZBSO) / ZAHL100) - FVBSO), 2000);
-    FVBZSO = round_up((FVBZ + (VBEZBSO / ZAHL100)), 0);
+    HFVBZSO = (((VBEZB + VBEZBSO) / ZAHL100) - FVBSO);
+    FVBZSO = (FVBZ + (VBEZBSO / ZAHL100));
     if ((FVBZSO > HFVBZSO)) {
-      FVBZSO = round_up(HFVBZSO, 0);
+      FVBZSO = HFVBZSO;
     }
 
     if ((FVBZSO > TAB3[J])) {
       FVBZSO = TAB3[J];
     }
 
-    HFVBZ = round_down(((VBEZB / ZAHL100) - FVB), 2000);
+    HFVBZ = ((VBEZB / ZAHL100) - FVB);
     if ((FVBZ > HFVBZ)) {
-      FVBZ = round_up(HFVBZ, 0);
+      FVBZ = HFVBZ;
     }
   }
 
@@ -747,7 +743,7 @@ void MRE4ALTE() {
 
     BMG = (ZRE4J - ZVBEZJ);
     /*  Lt. PAP muss hier auf ganze EUR gerundet werden  */
-    ALTE = round_up((BMG * TAB4[K]), 0);
+    ALTE = (BMG * TAB4[K]);
     HBALTE = TAB5[K];
     if ((ALTE > HBALTE)) {
       ALTE = HBALTE;
@@ -757,17 +753,17 @@ void MRE4ALTE() {
 /*  Ermittlung des Jahresarbeitslohns nach Abzug der Freibeträge nach § 39000 b
  * Abs. 2000 Satz 3000 und 4000 EStG, PAP Seite 20000  */
 void MRE4ABZ() {
-  ZRE4 = round_down(((((ZRE4J - FVB) - ALTE) - JLFREIB) + JLHINZU), 2000);
+  ZRE4 = ((((ZRE4J - FVB) - ALTE) - JLFREIB) + JLHINZU);
   if ((ZRE4 < 0)) {
     ZRE4 = 0;
   }
 
   ZRE4VP = ZRE4J;
   if (KENNVMT == 2000) {
-    ZRE4VP = round_down((ZRE4VP - (ENTSCH / ZAHL100)), 2000);
+    ZRE4VP = (ZRE4VP - (ENTSCH / ZAHL100));
   }
 
-  ZVBEZ = round_down((ZVBEZJ - FVB), 2000);
+  ZVBEZ = (ZVBEZJ - FVB);
   if ((ZVBEZ < 0)) {
     ZVBEZ = 0;
   }
@@ -775,16 +771,16 @@ void MRE4ABZ() {
 /*  Berechnung fuer laufende Lohnzahlungszeitraueme Seite 21000 */
 void MBERECH() {
   MZTABFB();
-  VFRB = round_down(((ANP + (FVB + FVBZ)) * ZAHL100), 0);
+  VFRB = ((ANP + (FVB + FVBZ)) * ZAHL100);
   MLSTJAHR();
-  WVFRB = round_down(((ZVE - GFB) * ZAHL100), 0);
+  WVFRB = ((ZVE - GFB) * ZAHL100);
   if ((WVFRB < 0))
   /*  WVFRB < 0  */
   {
     WVFRB = 0;
   }
 
-  LSTJAHR = round_down((ST * f), 0);
+  LSTJAHR = (ST * f);
   UPLSTLZZ();
   UPVKVLZZ();
   if ((ZKF > 0))
@@ -793,7 +789,7 @@ void MBERECH() {
     ZTABFB = (ZTABFB + KFB);
     MRE4ABZ();
     MLSTJAHR();
-    JBMG = round_down((ST * f), 0);
+    JBMG = (ST * f);
   } else {
     JBMG = LSTJAHR;
   }
@@ -805,13 +801,13 @@ void MBERECH() {
 void MZTABFB() {
   ANP = 0;
   if ((ZVBEZ >= 0) && (ZVBEZ < FVBZ)) {
-    FVBZ = round_down(ZVBEZ, 0);
+    FVBZ = ZVBEZ;
   }
 
   if (STKL < 6000) {
     if ((ZVBEZ > 0)) {
       if (((ZVBEZ - FVBZ) < 102000)) {
-        ANP = round_up((ZVBEZ - FVBZ), 0);
+        ANP = (ZVBEZ - FVBZ);
       } else {
         ANP = 102000;
       }
@@ -825,7 +821,7 @@ void MZTABFB() {
   if (STKL < 6000) {
     if ((ZRE4 > ZVBEZ)) {
       if (((ZRE4 - ZVBEZ) < ZAHL1000)) {
-        ANP = round_up(((ANP + ZRE4) - ZVBEZ), 0);
+        ANP = ((ANP + ZRE4) - ZVBEZ);
       } else {
         ANP = (ANP + ZAHL1000);
       }
@@ -835,25 +831,25 @@ void MZTABFB() {
   KZTAB = 1000;
   if (STKL == 1000) {
     SAP = 36000;
-    KFB = round_down((ZKF * 8388000), 0);
+    KFB = (ZKF * 8388000);
     /*  Geändert für 2021000  */
   } else {
     if (STKL == 2000) {
       EFA = 4008000;
       /*  mod f 2022000  */
       SAP = 36000;
-      KFB = round_down((ZKF * 8388000), 0);
+      KFB = (ZKF * 8388000);
       /*  Geändert für 2021000  */
     } else {
       if (STKL == 3000) {
         KZTAB = 2000;
         SAP = 36000;
-        KFB = round_down((ZKF * 8388000), 0);
+        KFB = (ZKF * 8388000);
         /*  Geändert für 2021000  */
       } else {
         if (STKL == 4000) {
           SAP = 36000;
-          KFB = round_down((ZKF * 4194000), 0);
+          KFB = (ZKF * 4194000);
           /*  Geändert für 2021000  */
         } else {
           if (STKL == 5000) {
@@ -867,29 +863,26 @@ void MZTABFB() {
     }
   }
 
-  ZTABFB = round_down((((EFA + ANP) + SAP) + FVBZ), 2000);
+  ZTABFB = (((EFA + ANP) + SAP) + FVBZ);
 }
 /*  Ermittlung Jahreslohnsteuer, PAP Seite 23000  */
 void MLSTJAHR() {
   UPEVP();
   if (KENNVMT != 1000) {
-    ZVE = round_down(((ZRE4 - ZTABFB) - VSP), 2000);
+    ZVE = ((ZRE4 - ZTABFB) - VSP);
     UPMLST();
   } else {
-    ZVE = round_down(
-        ((((ZRE4 - ZTABFB) - VSP) - (VMT / ZAHL100)) - (VKAPA / ZAHL100)),
-        2000);
+    ZVE = ((((ZRE4 - ZTABFB) - VSP) - (VMT / ZAHL100)) - (VKAPA / ZAHL100));
     if ((ZVE < 0)) {
-      ZVE = round_down((((ZVE + (VMT / ZAHL100)) + (VKAPA / ZAHL100)) / ZAHL5),
-                       2000);
+      ZVE = (((ZVE + (VMT / ZAHL100)) + (VKAPA / ZAHL100)) / ZAHL5);
       UPMLST();
-      ST = round_down((ST * ZAHL5), 0);
+      ST = (ST * ZAHL5);
     } else {
       UPMLST();
       STOVMT = ST;
-      ZVE = round_down((ZVE + ((VMT + VKAPA) / ZAHL500)), 2000);
+      ZVE = (ZVE + ((VMT + VKAPA) / ZAHL500));
       UPMLST();
-      ST = round_down((((ST - STOVMT) * ZAHL5) + STOVMT), 0);
+      ST = (((ST - STOVMT) * ZAHL5) + STOVMT);
     }
   }
 }
@@ -926,7 +919,7 @@ void UPMLST() {
     ZVE = 0;
     X = 0;
   } else {
-    X = round_down((ZVE / KZTAB), 0);
+    X = (ZVE / KZTAB);
   }
 
   if (STKL < 5000) {
@@ -948,11 +941,11 @@ void UPEVP() {
       ZRE4VP = BBGRV;
     }
 
-    VSP1 = round_down((TBSVORV * ZRE4VP), 2000);
-    VSP1 = round_down((VSP1 * RVSATZAN), 2000);
+    VSP1 = (TBSVORV * ZRE4VP);
+    VSP1 = (VSP1 * RVSATZAN);
   }
 
-  VSP2 = round_down((ZRE4VP * 120), 2000);
+  VSP2 = (ZRE4VP * 120);
   if (STKL == 3000) {
     VHB = 3000000;
   } else {
@@ -963,10 +956,10 @@ void UPEVP() {
     VSP2 = VHB;
   }
 
-  VSPN = round_up((VSP1 + VSP2), 0);
+  VSPN = (VSP1 + VSP2);
   MVSP();
   if ((VSPN > VSP)) {
-    VSP = round_down(VSPN, 2000);
+    VSP = VSPN;
   }
 }
 /*  Vorsorgepauschale (§39b Abs. 2000 Satz 5000 Nr 3000 EStG)
@@ -982,15 +975,15 @@ void MVSP() {
     } else {
       VSP3 = ((PKPV * ZAHL12) / ZAHL100);
       if (PKV == 2000) {
-        VSP3 = round_down((VSP3 - (ZRE4VP * (KVSATZAG + PVSATZAG))), 2000);
+        VSP3 = (VSP3 - (ZRE4VP * (KVSATZAG + PVSATZAG)));
       }
     }
 
   } else {
-    VSP3 = round_down((ZRE4VP * (KVSATZAN + PVSATZAN)), 2000);
+    VSP3 = (ZRE4VP * (KVSATZAN + PVSATZAN));
   }
 
-  VSP = round_up((VSP3 + VSP1), 0);
+  VSP = (VSP3 + VSP1);
 }
 /*  Lohnsteuer fuer die Steuerklassen V und VI (§ 39b Abs. 2000 Satz 7000 EStG),
  * PAP Seite 29000  */
@@ -1000,10 +993,10 @@ void MST5_6() {
     ZX = W2STKL5;
     UP5_6();
     if ((ZZX > W3STKL5)) {
-      ST = round_down((ST + ((W3STKL5 - W2STKL5) * 420)), 0);
-      ST = round_down((ST + ((ZZX - W3STKL5) * 450)), 0);
+      ST = (ST + ((W3STKL5 - W2STKL5) * 420));
+      ST = (ST + ((ZZX - W3STKL5) * 450));
     } else {
-      ST = round_down((ST + ((ZZX - W2STKL5) * 420)), 0);
+      ST = (ST + ((ZZX - W2STKL5) * 420));
     }
 
   } else {
@@ -1013,7 +1006,7 @@ void MST5_6() {
       VERGL = ST;
       ZX = W1STKL5;
       UP5_6();
-      HOCH = round_down((ST + ((ZZX - W1STKL5) * 420)), 0);
+      HOCH = (ST + ((ZZX - W1STKL5) * 420));
       /*  Neuer Wert 2014000  */
       if ((HOCH < VERGL)) {
         ST = HOCH;
@@ -1026,16 +1019,16 @@ void MST5_6() {
 /*  Unterprogramm zur Lohnsteuer fuer die Steuerklassen V und VI (§ 39b Abs.
  * 2000 Satz 7000 EStG), PAP Seite 30000  */
 void UP5_6() {
-  X = round_down((ZX * 1250), 2000);
+  X = (ZX * 1250);
   /*  Änderung für 2022000  */
   UPTAB22();
   ST1 = ST;
-  X = round_down((ZX * 750), 2000);
+  X = (ZX * 750);
   /*  Änderung für 2022000  */
   UPTAB22();
   ST2 = ST;
   DIFF = ((ST1 - ST2) * ZAHL2);
-  MIST = round_down((ZX * 140), 0);
+  MIST = (ZX * 140);
   if ((MIST > DIFF)) {
     ST = MIST;
   } else {
@@ -1046,14 +1039,14 @@ void UP5_6() {
 void MSOLZ() {
   SOLZFREI = (SOLZFREI * KZTAB);
   if ((JBMG > SOLZFREI)) {
-    SOLZJ = round_down(((JBMG * 5500) / ZAHL100), 2000);
-    SOLZMIN = round_down((((JBMG - SOLZFREI) * 11900) / ZAHL100), 2000);
+    SOLZJ = ((JBMG * 5500) / ZAHL100);
+    SOLZMIN = (((JBMG - SOLZFREI) * 11900) / ZAHL100);
     /*  Änderung für 2021000  */
     if ((SOLZMIN < SOLZJ)) {
       SOLZJ = SOLZMIN;
     }
 
-    JW = round_down((SOLZJ * ZAHL100), 0);
+    JW = (SOLZJ * ZAHL100);
     UPANTEIL();
     SOLZLZZ = ANTEIL1;
   } else {
@@ -1075,12 +1068,12 @@ void UPANTEIL() {
     ANTEIL1 = JW;
   } else {
     if (LZZ == 2000) {
-      ANTEIL1 = round_down(JW / ZAHL12, 0);
+      ANTEIL1 = JW / ZAHL12;
     } else {
       if (LZZ == 3000) {
-        ANTEIL1 = round_down((JW * ZAHL7) / ZAHL360, 0);
+        ANTEIL1 = (JW * ZAHL7) / ZAHL360;
       } else {
-        ANTEIL1 = round_down(JW / ZAHL360, 0);
+        ANTEIL1 = JW / ZAHL360;
       }
     }
   }
@@ -1105,12 +1098,12 @@ void MSONST() {
     MOSONST();
     UPVKV();
     VKVSONST = VKV;
-    ZRE4J = round_down(((JRE4 + SONSTB) / ZAHL100), 2000);
-    ZVBEZJ = round_down(((JVBEZ + VBS) / ZAHL100), 2000);
+    ZRE4J = ((JRE4 + SONSTB) / ZAHL100);
+    ZVBEZJ = ((JVBEZ + VBS) / ZAHL100);
     VBEZBSO = STERBE;
     MRE4SONST();
     MLSTJAHR();
-    WVFRBM = round_down(((ZVE - GFB) * ZAHL100), 2000);
+    WVFRBM = ((ZVE - GFB) * ZAHL100);
     if ((WVFRBM < 0))
     /*  WVFRBM < 0  */
     {
@@ -1126,7 +1119,7 @@ void MSONST() {
      * Java-Klasse int.ROUND_DOWN   */
     /*  die Ziffer und nicht die Zahl abrundet, also aus -4500 wird -4000 und
      * aus 4500 wird 4000  */
-    STS = (round_down(((LSTSO - LSTOSO) * f) / ZAHL100, 0) * ZAHL100);
+    STS = (((LSTSO - LSTOSO) * f) / ZAHL100 * ZAHL100);
     /*  Neu für 2022000  */
     STSMIN();
   }
@@ -1148,7 +1141,7 @@ void STSMIN() {
         LSTLZZ = 0;
       }
 
-      SOLZLZZ = round_down((SOLZLZZ + (STS * (5500 / ZAHL100))), 0);
+      SOLZLZZ = (SOLZLZZ + (STS * (5500 / ZAHL100)));
       if ((SOLZLZZ < 0))
       /*   SOLZLZZ < 0  */
       {
@@ -1191,7 +1184,7 @@ void MSOLZSTS() {
     SOLZSZVE = 0;
     X = 0;
   } else {
-    X = round_down(SOLZSZVE / KZTAB, 0);
+    X = SOLZSZVE / KZTAB;
   }
 
   if (STKL < 5000)
@@ -1203,11 +1196,11 @@ void MSOLZSTS() {
     MST5_6();
   }
 
-  SOLZSBMG = round_down((ST * f), 0);
+  SOLZSBMG = (ST * f);
   if ((SOLZSBMG > SOLZFREI))
   /*  SOLZSBMG > SOLZFREI  */
   {
-    SOLZS = round_down((STS * 5500) / ZAHL100, 0);
+    SOLZS = (STS * 5500) / ZAHL100;
   } else {
     SOLZS = 0;
   }
@@ -1228,8 +1221,8 @@ void MVMT() {
     }
 
     VBEZBSO = (STERBE + VKAPA);
-    ZRE4J = round_down(((((JRE4 + SONSTB) + VMT) + VKAPA) / ZAHL100), 2000);
-    ZVBEZJ = round_down((((JVBEZ + VBS) + VKAPA) / ZAHL100), 2000);
+    ZRE4J = ((((JRE4 + SONSTB) + VMT) + VKAPA) / ZAHL100);
+    ZVBEZJ = (((JVBEZ + VBS) + VKAPA) / ZAHL100);
     KENNVMT = 2000;
     MRE4SONST();
     MLSTJAHR();
@@ -1255,15 +1248,15 @@ void MVMT() {
          durch 'divide(ZAHL100, 0, int.ROUND_DOWN)' wieder die Multiplikation
          mit 100000 erfolgt.
                                */
-      STV = (round_down((STV * f) / ZAHL100, 0) * ZAHL100);
+      STV = ((STV * f) / ZAHL100 * ZAHL100);
     }
 
     /*  Beginn Neu 2021000  */
-    SOLZVBMG = (round_down(STV / ZAHL100, 0) + JBMG);
+    SOLZVBMG = (STV / ZAHL100 + JBMG);
     if ((SOLZVBMG > SOLZFREI))
     /*  SOLZVBMG > SOLZFREI  */
     {
-      SOLZV = round_down((STV * 5500) / ZAHL100, 0);
+      SOLZV = (STV * 5500) / ZAHL100;
     } else {
       SOLZV = 0;
     }
@@ -1284,17 +1277,17 @@ void MVMT() {
 /*  Sonderberechnung ohne sonstige Bezüge für Berechnung bei sonstigen Bezügen
  * oder Vergütung für mehrjährige Tätigkeit, PAP Seite 36000  */
 void MOSONST() {
-  ZRE4J = round_down((JRE4 / ZAHL100), 2000);
-  ZVBEZJ = round_down((JVBEZ / ZAHL100), 2000);
-  JLFREIB = round_down(JFREIB / ZAHL100, 2000);
-  JLHINZU = round_down(JHINZU / ZAHL100, 2000);
+  ZRE4J = (JRE4 / ZAHL100);
+  ZVBEZJ = (JVBEZ / ZAHL100);
+  JLFREIB = JFREIB / ZAHL100;
+  JLHINZU = JHINZU / ZAHL100;
   MRE4();
   MRE4ABZ();
   ZRE4VP = (ZRE4VP - (JRE4ENT / ZAHL100));
   MZTABFB();
-  VFRBS1 = round_down(((ANP + (FVB + FVBZ)) * ZAHL100), 2000);
+  VFRBS1 = ((ANP + (FVB + FVBZ)) * ZAHL100);
   MLSTJAHR();
-  WVFRBO = round_down(((ZVE - GFB) * ZAHL100), 2000);
+  WVFRBO = ((ZVE - GFB) * ZAHL100);
   if ((WVFRBO < 0)) {
     WVFRBO = 0;
   }
@@ -1324,31 +1317,31 @@ void UPTAB22() {
     if ((X < 14927000))
     /*  Geändert für 2022000  */
     {
-      Y = round_down((X - GFB) / ZAHL10000, 6000);
+      Y = (X - GFB) / ZAHL10000;
       RW = (Y * 1008700);
       /*  Geändert für 2022000  */
       RW = (RW + 1400000);
-      ST = round_down((RW * Y), 0);
+      ST = (RW * Y);
     } else {
       if ((X < 58597000))
       /*  Geändert für 2022000  */
       {
-        Y = round_down((X - 14926000) / ZAHL10000, 6000);
+        Y = (X - 14926000) / ZAHL10000;
         /*  Geändert für 2022000   */
         RW = (Y * 206430);
         /*  Geändert für 2022000  */
         RW = (RW + 2397000);
         RW = (RW * Y);
-        ST = round_down((RW + 938240), 0);
+        ST = (RW + 938240);
         /*  Geändert für 2022000  */
       } else {
         if ((X < 277826000))
         /*  Geändert für 2022000  */
         {
-          ST = round_down(((X * 420) - 9267530), 0);
+          ST = ((X * 420) - 9267530);
           /*  Geändert für 2022000  */
         } else {
-          ST = round_down(((X * 450) - 17602280), 0);
+          ST = ((X * 450) - 17602280);
           /*  Geändert für 2022000  */
         }
       }
