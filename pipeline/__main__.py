@@ -1,179 +1,24 @@
 #!/usr/bin/python
 import os
 import re
-import sys
+from .helper import *
+from pathlib import Path
 import typing
-from typing import FrozenSet
 
 import pycparser
 
-import stackprinter
 from pycparser import c_ast
-from pycparser.c_ast import NodeVisitor, UnaryOp, BinaryOp
 from pycparser.c_generator import CGenerator
-
-stackprinter.set_excepthook(style='darkbg2')
 
 import subprocess
 import argparse
 import yaml
 
-
-class SymbolicExecution(NodeVisitor):
-    def __init__(self, cast: c_ast.FileAST):
-        self.state: typing.Dict[str, str] = dict()
-        self.defines: typing.Dict[str, c_ast.Node] = dict()
-        self.count: typing.Dict[str, int] = dict()
-        self.file_ast = cast
-
-        self.init_global_state()
-        self.call()
-
-    def init_global_state(self):
-        for c in self.file_ast:
-            if isinstance(c, c_ast.Decl) and not isinstance(c.type, c_ast.FuncDecl):
-                self.state[c.name] = c.name
-
-    def call(self, func='main'):
-        function = find(lambda x: isinstance(x, c_ast.FuncDef) and x.decl.name == func, self.file_ast.ext)
-        if function:
-            self.visit(function.body)
-        else:
-            raise BaseException(f"Could not find function {func}")
-
-    def visit_FuncCall(self, node: c_ast.FuncCall):
-        # No support for arguments at this point
-        if node.args is not None:
-            return node
-        self.call(func=node.name.name)
-
-    def visit_Constant(self, node: c_ast.Constant):
-        return node
-
-    def visit_Assignment(self, node: c_ast.Assignment):
-        expr = NodeVisitor.visit(self, node.rvalue)
-        name = node.lvalue.name
-        ssa_name = self.fresh_ssa_name(name)
-        self.defines[ssa_name] = expr
-        self.state[name] = ssa_name
-
-    def fresh_ssa_name(self, name):
-        cnt = self.count.get(name, 0) + 1
-        self.count[name] = cnt
-        ssa_name = "%s_%04d" % (name, cnt)
-        return ssa_name
-
-    def visit_If(self, node: c_ast.If):
-        cond = NodeVisitor.visit(self, node.cond)
-        old = self.state
-
-        self.state = old.copy()
-        NodeVisitor.visit(self, node.iftrue)
-        then = self.state
-
-        other = self.state = old.copy()
-        if node.iffalse is not None:
-            NodeVisitor.visit(self, node.iffalse)
-            other = self.state
-
-        self.state = self.merge_states(cond, then, other)
-        return None
-
-    def visit_BinaryOp(self, node: c_ast.BinaryOp):
-        left = NodeVisitor.visit(self, node.left)
-        right = NodeVisitor.visit(self, node.right)
-        return BinaryOp(node.op, left, right, node.coord)
-
-    def visit_UnaryOp(self, node: c_ast.UnaryOp):
-        expr = NodeVisitor.visit(self, node.expr)
-        return UnaryOp(node.op, expr, node.coord)
-
-    def visit_ID(self, node: c_ast.ID):
-        if node.name in self.state:
-            return c_ast.ID(self.state[node.name])
-        else:
-            return node
-
-    def merge_states(self, cond, then, other):
-        state = {}
-        keys = set(then.keys()).union(other.keys())
-
-        for k in keys:
-            t = then[k]
-            e = other[k]
-            if t == e:
-                state[k] = t
-            else:
-                ssa_name = self.fresh_ssa_name(k)
-                self.defines[ssa_name] = c_ast.TernaryOp(cond, c_ast.ID(t), c_ast.ID(e))
-                state[k] = ssa_name
-        return state
+TMP_FOLDER: Path = Path("./tmp").absolute()
 
 
-def find(pred, seq):
-    for tl in seq:
-        if pred(tl): return tl
-    return None
-
-
-class ExprCapture(pycparser.c_ast.NodeVisitor):
-    def __init__(self):
-        self.exprs = set()
-
-    def visit_BinaryOp(self, node: BinaryOp):
-        self.exprs.add(node)
-        NodeVisitor.generic_visit(self, node)
-
-    def visit_UnaryOp(self, node: UnaryOp):
-        self.exprs.add(node)
-        NodeVisitor.generic_visit(self, node)
-
-    def visit_FuncCall(self, node: UnaryOp):
-        self.exprs.add(node)
-        NodeVisitor.generic_visit(self, node)
-
-
-class ContainsVariable(NodeVisitor):
-    def __init__(self, variables: FrozenSet[str]):
-        self.variables = variables
-        self.found = False
-
-    def visit_ID(self, node: c_ast.ID):
-        if node.name in self.variables:
-            self.found = True
-
-
-def cycleCheck(node: c_ast.Node, parents=None):
-    if not parents:
-        parents = []
-
-    parents.append(node)
-
-    for c in node:
-        if c in parents:
-            raise BaseException("CYCLE!")
-        cycleCheck(c, parents)
-    parents.remove(node)
-
-
-def input_pure(node: c_ast.Node, var_names: typing.List[str]):
-    class IsPureVisitor(c_ast.NodeVisitor):
-        def __init__(self):
-            self.pure = True
-            self.contains_var = False
-
-        def visit_FunCall(self, node):
-            self.pure = False
-
-        def visit_ID(self, node):
-            self.contains_var = True
-            if node.name not in var_names:
-                self.pure = False
-
-    v = IsPureVisitor()
-    v.visit(node)
-    if v.pure and v.contains_var:
-        return CGenerator().visit(node)
+def log(*args):
+    print(">>>", *args)
 
 
 class ExtractFacts(object):
@@ -210,7 +55,7 @@ class ExtractFacts(object):
 
         # import pprint
         # pprint.pprint(self.facts)
-        self.config['FACTS'] = self.facts
+        self.config['AUTO_FACTS'] = self.facts
 
     def simple_binary_comparison_in_source(self):
         def simple_binary(node: c_ast.Node):
@@ -278,33 +123,22 @@ class EmbeddingPrinter(CGenerator):
 
 
 class ExecutePipeline(object):
-    def __init__(self, config, filename):
+    def __init__(self, config, filename: Path):
         self.config = config
         self.filename = filename
-        self.tmpfile = "lohnsteuer_runtmp.c"
-        self.executable = "lohnsteuer_run.out"
+        self.tmpfile = TMP_FOLDER / (filename.stem + "_run.c")
+        self.executable = TMP_FOLDER / (filename.stem + "_run")
         self.prepare_command = "gcc -o %s %s" % (self.executable, self.tmpfile)
-        self.run_command = "./" + self.executable
+        self.run_command = self.executable
 
     def run(self):
-        self.inject()
-        self.compile()
-        self.execute()
+        self._inject()
+        self._compile()
+        self._execute()
 
-    def compile(self):
-        print("Compile generated c file: ", self.prepare_command)
-        errorlevel = os.system(self.prepare_command)
-        if errorlevel > 0:
-            sys.exit(errorlevel)
+    def _inject(self):
+        log("Inject input assignments")
 
-    def execute(self):
-        print("Compile generated c file: ", self.run_command)
-        output = subprocess.check_output(self.run_command).decode()
-        print(output)
-        output = yaml.safe_load(output)
-        self.config['OUTPUTS'] = output['OUTPUTS']
-
-    def inject(self):
         with open(self.filename) as fh:
             text = fh.read()
 
@@ -314,7 +148,7 @@ class ExecutePipeline(object):
 
         outputs = '\nprintf("\\nOUTPUTS:\\n");'
         for name in self.config['OUTPUTS'].keys():
-            outputs += f'\nprintf("  - {name}: %f\\n", {name});'
+            outputs += f'\nprintf("  {name}: %d\\n", {name});'
 
         text = text.replace('//%INPUT%', assignments) \
             .replace('//%OUTPUT%', outputs) \
@@ -323,63 +157,118 @@ class ExecutePipeline(object):
         with open(self.tmpfile, 'w') as fh:
             fh.write(text)
 
+    def _compile(self):
+        log("Compile generated C file:", self.prepare_command)
+        error_level = os.system(self.prepare_command)
+        if error_level > 0:
+            sys.exit(error_level)
 
-class CBMCFactsMinimalism(object):
-    def __init__(self, config, filename):
+    def _execute(self):
+        log("Run executable:", self.run_command)
+        output = subprocess.check_output(self.run_command).decode()
+        log(output)
+        log("Update output assignments in the given YAML file")
+        output = yaml.safe_load(output)
+        self.config['OUTPUTS'] = output['OUTPUTS']
+
+
+class CheckForContradiction(object):
+    def __init__(self, config, filename: Path):
         self.config = config
         self.filename = filename
-        self.tmpfile = "lohnsteuer_cbmctmp.c"
-        self.smt_file = "lohnsteuer_cbmc.smt2"
-        self.run_command = "z3 -smt2 " + self.smt_file
+        self.tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.c")
+
+    def run(self):
+        program = """
+        int main() {
+        """
+        for n in self.config['INPUTS'].keys():
+            program += f"int {n};\n"
+
+        facts = self.config['AUTO_FACTS'] + self.config['USER_FACTS']
+        for f1 in facts:
+            for f2 in facts:
+                program += f"assert(!(({f1}) && ({f2})));\n"
+
+        program += "}"
+        self.tmp_file.write_text(program)
+        log("Write ", self.tmp_file)
+        #ecode, out = subprocess.getstatusoutput(["z3", "-program", self.tmp_file])
+
+
+class CBMCFactsMinimalism(object):
+    def __init__(self, config, filename: Path):
+        self.config = config
+        self.filename = filename
+        self.tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.c")
+        self.smt_file = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.smt2")
         self.prepare_command = f"cbmc --z3 --outfile {self.smt_file} {self.tmpfile}"
 
     def run(self):
-        self.inject()
-        self.generate_smt()
-        # self.execute()
+        self._inject()
+        self._generate_smt()
+        self._execute()
 
-    def inject(self):
-        with open(self.filename) as fh:
-            text = fh.read()
+    def _inject(self):
+        log("Inject fact as assumption")
+        text = self.filename.read_text()
 
-        assignments = ""
-        for (idx, value) in enumerate(self.config['FACTS']):
-            assignments += f"\n__CPROVER_bool FACT_{idx};// = nondet_bool();"
-            assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
+        assignments = "__CPROVER_bool TRUE = 1; //A constant which is always true\n"
+        for (idx, value) in enumerate(self.config['USER_FACTS'] + self.config['AUTO_FACTS']):
+            log(f"> Add fact {value}")
+            assignments += f"\n__CPROVER_bool FACT_{idx}; //FACT_{idx} = 1;"
+            # assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
             assignments += f"\nif(FACT_{idx}) __CPROVER_assume({value});"
 
+        log(f"Inject output as assertions")
         outputs = ""
         for (name, value) in self.config['OUTPUTS'].items():
-            outputs += f'\n__CPROVER_assert({name} == {value}, "");'
+            log(f"> Add output {name} == {value}")
+            outputs += f'\n__CPROVER_assert({name} == {value}, "Output: {name}");'
 
-        text = text.replace('//%INPUT%', assignments) \
-            .replace('//%OUTPUT%', outputs)
+        text = text.replace('//%INPUT%', assignments).replace('//%OUTPUT%', outputs)
 
-        with open(self.tmpfile, 'w') as fh:
-            fh.write(text)
+        self.tmpfile.write_text(text)
 
-    def generate_smt(self):
-        print("Generate SMT file: ", self.prepare_command)
+    def _generate_smt(self):
+        log("Generate SMT file: ", self.prepare_command)
         errorlevel = os.system(self.prepare_command)
         if errorlevel > 0:
             sys.exit(errorlevel)
 
-        with open(self.smt_file) as fh:
-            smt2 = fh.read()
+        smt2 = self.smt_file.read_text()
 
         search = re.compile(r'\(assert \(= \|main::1::FACT_(\d+)!0@1#1\| \|symex::io::(\d+)\|\)\)')
-        new = r"(assert (! (= |main::1::FACT_\1!0@1#1| |symex::io::\2|) :named FACT_\1))"
-        smt2 = search.sub(new, smt2)
+        # new = r"(assert (! (= |main::1::FACT_\1!0@1#1| |symex::io::\2|) :named FACT_\1))"
+        # search.sub(new, smt2)
 
+        named = ""
+        for idx, value in enumerate(self.config['USER_FACTS'] + self.config['AUTO_FACTS']):
+            named += f"\n(assert (! (= |main::1::FACT_{idx}!0@1#1| true) :named FACT_{idx}))"
+        smt2 = smt2.replace("(check-sat)", named + "\n(check-sat)\n(get-unsat-core)")
+
+        log("Inject names and options into SMT file.")
         with open(self.smt_file, 'w') as fh:
+            fh.write(";; Force z3 to compute the minimal unsat-core\n"
+                     "(set-option :produce-unsat-cores true)\n"
+                     "(set-option :smt.core.minimize true)\n")
             fh.write(smt2)
 
-    def execute(self):
-        print("Run SMT2 solver: ", self.run_command)
-        output = subprocess.check_output(self.run_command).decode()
-        print(output)
-        output = yaml.safe_load(output)
-        self.config['OUTPUTS'] = output['OUTPUTS']
+    def _execute(self):
+        log("Run SMT2 solver: z3 -smt2 ", self.smt_file)
+        exitcode, output = subprocess.getstatusoutput(f"z3 -smt2 {self.smt_file}")
+        lines = output.split("\n")
+        if lines[0] == "unsat":
+            unsat_core = lines[1].strip("()").split(" ")
+            log("Required facts: ", unsat_core)
+            selected_fact_ids = [int(x[len('FACT_'):]) for x in unsat_core]
+            facts = self.config['USER_FACTS'] + self.config['AUTO_FACTS']
+            selected_facts = [facts[i] for i in selected_fact_ids]
+            log("Selected facts", selected_facts)
+            self.config['SELECTED_FACTS'] = selected_facts
+        else:
+            log("Given set of facts are insufficient to guarantee output.")
+            sys.exit(2)
 
 
 class RenameingPrinter(CGenerator):
@@ -414,7 +303,7 @@ class RenameingPrinter(CGenerator):
             nt = c_ast.ArrayDecl(c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
                                  nt.dim, nt.dim_quals, nt.coord)
         else:
-            print("ERROR")
+            log("ERROR")
 
         new = c_ast.Decl(n.name + self.suffix,
                          n.quals, n.align, n.storage, n.funcspec, nt,
@@ -456,7 +345,7 @@ class CBMCFactUniqueness(object):
                 fh.write(f"\n{value}_1 = nondet_double();")
                 fh.write(f"\n{value}_2 = nondet_double();")
 
-            for (idx, value) in enumerate(self.config['FACTS']):
+            for (idx, value) in enumerate(self.config['USER_FACTS'] + self.config['AUTO_FACTS']):
                 fh.write(f"\n    // FACT {idx}")
                 fh.write(f"\n    __CPROVER_assume(({rename('_1', value)}) == ({rename('_2', value)}));")
 
@@ -482,42 +371,66 @@ class CBMCFactUniqueness(object):
                     for value in self.config['INTERNALS'].keys():
                         fh.write(f"\n    __CPROVER_assert({value}_1 == {value}_2, \"\");")
 
-            # fh.write("    main_1(); main_2();\n")
-
             fh.write("\n}")
 
-        print(f"Run clang-format -i {self.tmpfile}")
+        log(f"Run clang-format -i {self.tmpfile}")
         os.system(f"clang-format -i {self.tmpfile}")
 
     def execute(self):
-        print("Run CBMC solver: ", self.run_command)
+        log("Run CBMC solver: ", self.run_command)
         sys.exit(os.system(self.run_command))
 
 
 def get_cli():
     a = argparse.ArgumentParser()
-    a.add_argument("--mode")
-    a.add_argument("--eqin", default=True)
-    a.add_argument("config")
-    a.add_argument("program")
+    a.add_argument("--mode", help="Operation mode")
+    a.add_argument("--datatype", help="int or float", default="int")
+    a.add_argument("--tmp", help="Folder for temporary files", metavar="FOLDER", default="tmp")
+    a.add_argument("--eqin", help="", default=True)
+    a.add_argument("config", help="meta data of the given program")
+    a.add_argument("program", help="a C-program file")
     return a
+
+
+# class ProgramConfig():
+#    def __init__(self):
+#        self.auto_facts: typing.List[str] = []
+#        self.user_facts: typing.List[str] = []
+#        self.inputs: typing.Dict[str, str] = {}
+#        self.outputs: typing.Dict[str, str] = {}
+#        self.internals: typing.Dict[str, str] = {}
+#
+#    def facts(self):
+#        return self.auto_facts + self.user_facts
 
 
 if __name__ == "__main__":
     ap = get_cli()
     args = ap.parse_args()
 
+    program = Path(args.program)
+
+    TMP_FOLDER = Path(args.tmp).absolute()
+    TMP_FOLDER.mkdir(exist_ok=True)
+
     with open(args.config) as fh:
         config = yaml.safe_load(fh)
 
     if args.mode == 'cbmc':
-        pipeline = CBMCFactsMinimalism(config, args.program)
+        pipeline = CBMCFactsMinimalism(config, program)
     elif args.mode == 'facts':
-        pipeline = ExtractFacts(config, args.program)
+        pipeline = ExtractFacts(config, program)
     elif args.mode == 'selfcomp':
-        pipeline = CBMCFactUniqueness(config, args, args.program)
+        pipeline = CBMCFactUniqueness(config, args, program)
+    elif args.mode == 'check':
+        pipeline = CBMCFactsMinimalism(config, program)
+    elif args.mode == 'run':
+        pipeline = ExecutePipeline(config, program)
+    elif args.mode == 'check_contra':
+        pipeline = CheckForContradiction(config, program)
     else:
-        pipeline = ExecutePipeline(config, args.program)
+        log(f"Unknown mode {args.mode} given.")
+        sys.exit(1)
 
     pipeline.run()
     with open(args.config, 'w') as fh:

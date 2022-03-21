@@ -686,15 +686,15 @@ void MRE4() {
 
     if (LZZ == 1000) {
       VBEZB = ((VBEZM * ZMVB) + VBEZS);
-      HFVB = TAB2[J];
-      FVBZ = TAB3[J];
+      HFVB = TAB2[J / 1000];
+      FVBZ = TAB3[J / 1000];
     } else {
       VBEZB = ((VBEZM * ZAHL12) + VBEZS);
-      HFVB = TAB2[J];
-      FVBZ = TAB3[J];
+      HFVB = TAB2[J / 1000];
+      FVBZ = TAB3[J / 1000];
     }
 
-    FVB = ((VBEZB * TAB1[J]) / ZAHL100);
+    FVB = ((VBEZB * TAB1[J / 1000]) / ZAHL100);
     if ((FVB > HFVB)) {
       FVB = HFVB;
     }
@@ -703,9 +703,9 @@ void MRE4() {
       FVB = ZVBEZJ;
     }
 
-    FVBSO = (FVB + ((VBEZBSO * TAB1[J]) / ZAHL100));
-    if ((FVBSO > TAB2[J])) {
-      FVBSO = TAB2[J];
+    FVBSO = (FVB + ((VBEZBSO * TAB1[J / 1000]) / ZAHL100));
+    if ((FVBSO > TAB2[J / 1000])) {
+      FVBSO = TAB2[J / 1000];
     }
 
     HFVBZSO = (((VBEZB + VBEZBSO) / ZAHL100) - FVBSO);
@@ -714,8 +714,8 @@ void MRE4() {
       FVBZSO = HFVBZSO;
     }
 
-    if ((FVBZSO > TAB3[J])) {
-      FVBZSO = TAB3[J];
+    if ((FVBZSO > TAB3[J / 1000])) {
+      FVBZSO = TAB3[J / 1000];
     }
 
     HFVBZ = ((VBEZB / ZAHL100) - FVB);
@@ -743,8 +743,8 @@ void MRE4ALTE() {
 
     BMG = (ZRE4J - ZVBEZJ);
     /*  Lt. PAP muss hier auf ganze EUR gerundet werden  */
-    ALTE = (BMG * TAB4[K]);
-    HBALTE = TAB5[K];
+    ALTE = (BMG * TAB4[K / 1000]);
+    HBALTE = TAB5[K / 1000];
     if ((ALTE > HBALTE)) {
       ALTE = HBALTE;
     }

@@ -706,20 +706,20 @@ INTERNALS:
   ZZX: null
   bd: null
 OUTPUTS:
-  BK: 0.0
-  BKS: 0.0
-  BKV: 0.0
-  LSTLZZ: 0.0
-  SOLZLZZ: 0.0
-  SOLZS: 0.0
-  SOLZV: 0.0
-  STS: 0.0
-  STV: 0.0
-  VFRB: 0.0
-  VFRBS1: 0.0
-  VFRBS2: 0.0
-  VKVLZZ: 12.0
-  VKVSONST: 0.0
-  WVFRB: 0.0
-  WVFRBM: 0.0
-  WVFRBO: 0.0
+  BK: 0
+  BKS: 0
+  BKV: 0
+  LSTLZZ: 0
+  SOLZLZZ: 0
+  SOLZS: 0
+  SOLZV: 0
+  STS: 0
+  STV: 0
+  VFRB: 0
+  VFRBS1: 0
+  VFRBS2: 0
+  VKVLZZ: 100
+  VKVSONST: 0
+  WVFRB: 0
+  WVFRBM: 0
+  WVFRBO: 0

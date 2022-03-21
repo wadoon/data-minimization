@@ -1,0 +1,16 @@
+AUTO_FACTS: []
+INPUTS:
+  age: 33
+  income: 2352
+INTERNALS: []
+OUTPUTS:
+  TAX_RATE: 30
+SELECTED_FACTS:
+- income >= 3000
+- age >= 25
+USER_FACTS:
+- age >= 25
+- age >= 30
+- income >= 1000
+- income >= 2000
+- income >= 3000
