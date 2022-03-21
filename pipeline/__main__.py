@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import os
 import re
+from collections import defaultdict
+
 from .helper import *
 from pathlib import Path
 import typing
@@ -176,29 +178,72 @@ class CheckForContradiction(object):
     def __init__(self, config, filename: Path):
         self.config = config
         self.filename = filename
-        self.tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.c")
+        self.tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.smt2")
 
     def run(self):
-        program = """
-        int main() {
-        """
+        program = """        """
         for n in self.config['INPUTS'].keys():
-            program += f"int {n};\n"
+            program += f"(declare-const {n} Int);\n"
 
-        facts = self.config['AUTO_FACTS'] + self.config['USER_FACTS']
+        regex = re.compile(r"(.*) (==|<=|>|<|>=|!=) (.*)")
+
+        def postfix(s):
+            return regex.sub(r'(\2 \1 \3)', s)
+
+        F = self.config['AUTO_FACTS'] + self.config['USER_FACTS']
+        facts = list(map(postfix, F))
+
         for f1 in facts:
             for f2 in facts:
-                program += f"assert(!(({f1}) && ({f2})));\n"
+                program += "\n\n(push 1)"
+                program += f"\n(assert (and {f1} {f2}))"
+                program += "\n(check-sat)"
+                program += "\n(pop 1)"
 
-        program += "}"
         self.tmp_file.write_text(program)
         log("Write ", self.tmp_file)
-        #ecode, out = subprocess.getstatusoutput(["z3", "-program", self.tmp_file])
+        log("Call ", f"z3 -smt2 {self.tmp_file}")
+        ecode, out = subprocess.getstatusoutput(f"z3 -smt2 {self.tmp_file}")
+        contra_table = defaultdict(list)
+        L = len(F)
+        for idx, line in enumerate(out.splitlines(False)):
+            if line == 'unsat':
+                f1 = F[int(idx / L)]
+                f2 = F[idx % L]
+                log(f"Conflict between {f1} and {f2}")
+                contra_table[f1].append(f2)
+
+        self.config['XOR_FACTS'] = dict(contra_table)
+
+    def run_maxsat(self):
+        program = ""
+        for n in self.config['INPUTS'].keys():
+            program += f"(declare-const {n} Int);\n"
+
+        regex = re.compile(r"(.*) (==|<=|>|<|>=|!=) (.*)")
+
+        def postfix(s):
+            return regex.sub(r'(\2 \1 \3)', s)
+
+        F = self.config['AUTO_FACTS'] + self.config['USER_FACTS']
+        facts = list(map(postfix, F))
+
+        for idx, f1 in enumerate(facts):
+            program += f"\n(declare-const F{idx} Bool)"
+            program += f"\n(assert-soft F{idx} :weight 1)"
+            program += f"\n(assert (or (not F{idx}) {f1}))"
+        program += "\n(check-sat) (get-model)"
+
+        self.tmp_file.write_text(program)
+        log("Write ", self.tmp_file)
+        log("Call ", f"z3 -smt2 {self.tmp_file}")
+        ecode, out = subprocess.getstatusoutput(f"z3 -smt2 {self.tmp_file}")
 
 
 class CBMCFactsMinimalism(object):
-    def __init__(self, config, filename: Path):
+    def __init__(self, config, args, filename: Path):
         self.config = config
+        self.args = args
         self.filename = filename
         self.tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.c")
         self.smt_file = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.smt2")
@@ -210,15 +255,33 @@ class CBMCFactsMinimalism(object):
         self._execute()
 
     def _inject(self):
+        respect_contra_table = 'XOR_FACTS' in self.config and \
+                               len(self.config['XOR_FACTS']) > 0 and \
+                               not self.args.ignore_xor_facts
+
+        F = self.config['USER_FACTS'] + self.config['AUTO_FACTS']
+
         log("Inject fact as assumption")
         text = self.filename.read_text()
 
         assignments = "__CPROVER_bool TRUE = 1; //A constant which is always true\n"
-        for (idx, value) in enumerate(self.config['USER_FACTS'] + self.config['AUTO_FACTS']):
+        for (idx, value) in enumerate(F):
             log(f"> Add fact {value}")
             assignments += f"\n__CPROVER_bool FACT_{idx}; //FACT_{idx} = 1;"
             # assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
             assignments += f"\nif(FACT_{idx}) __CPROVER_assume({value});"
+
+        if respect_contra_table:
+            log("Prevent selection of contradictory facts!")
+            xor_facts = self.config['XOR_FACTS']
+            for (idx, value) in enumerate(F):
+                if value in xor_facts:
+                    log(f"> Contraction for {value} : {xor_facts[value]}")
+                    for xf in xor_facts[value]:
+                        xidx = F.index(xf)
+                        assignments += f"\n__CPROVER_assume( !FACT_{idx} || !FACT_{xidx});"
+                else:
+                    log(f"> No contraction known for {value}")
 
         log(f"Inject output as assertions")
         outputs = ""
@@ -238,7 +301,7 @@ class CBMCFactsMinimalism(object):
 
         smt2 = self.smt_file.read_text()
 
-        search = re.compile(r'\(assert \(= \|main::1::FACT_(\d+)!0@1#1\| \|symex::io::(\d+)\|\)\)')
+        # search = re.compile(r'\(assert \(= \|main::1::FACT_(\d+)!0@1#1\| \|symex::io::(\d+)\|\)\)')
         # new = r"(assert (! (= |main::1::FACT_\1!0@1#1| |symex::io::\2|) :named FACT_\1))"
         # search.sub(new, smt2)
 
@@ -384,6 +447,8 @@ class CBMCFactUniqueness(object):
 def get_cli():
     a = argparse.ArgumentParser()
     a.add_argument("--mode", help="Operation mode")
+    a.add_argument("-o", help="write updated config to different file")
+    a.add_argument("--ignore_xor_facts", help="", default=False)
     a.add_argument("--datatype", help="int or float", default="int")
     a.add_argument("--tmp", help="Folder for temporary files", metavar="FOLDER", default="tmp")
     a.add_argument("--eqin", help="", default=True)
@@ -423,7 +488,7 @@ if __name__ == "__main__":
     elif args.mode == 'selfcomp':
         pipeline = CBMCFactUniqueness(config, args, program)
     elif args.mode == 'check':
-        pipeline = CBMCFactsMinimalism(config, program)
+        pipeline = CBMCFactsMinimalism(config, args, program)
     elif args.mode == 'run':
         pipeline = ExecutePipeline(config, program)
     elif args.mode == 'check_contra':
@@ -433,5 +498,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     pipeline.run()
-    with open(args.config, 'w') as fh:
+
+    with open(args.config if args.o is None else args.o, 'w') as fh:
         yaml.safe_dump(config, fh)
