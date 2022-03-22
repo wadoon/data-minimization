@@ -248,8 +248,10 @@ class CBMCFactsMinimalism(object):
         self.tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.c")
         self.smt_file = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.smt2")
         self.prepare_command = f"cbmc --z3 --outfile {self.smt_file} {self.tmpfile}"
+        self.facts = []
 
     def run(self):
+        self.facts = filter_facts(config)  # only satisfied facts are allowed
         self._inject()
         self._generate_smt()
         self._execute()
@@ -259,26 +261,24 @@ class CBMCFactsMinimalism(object):
                                len(self.config['XOR_FACTS']) > 0 and \
                                not self.args.ignore_xor_facts
 
-        F = self.config['USER_FACTS'] + self.config['AUTO_FACTS']
-
         log("Inject fact as assumption")
         text = self.filename.read_text()
 
         assignments = "__CPROVER_bool TRUE = 1; //A constant which is always true\n"
-        for (idx, value) in enumerate(F):
+        for (idx, value) in enumerate(self.facts):
             log(f"> Add fact {value}")
             assignments += f"\n__CPROVER_bool FACT_{idx}; //FACT_{idx} = 1;"
             # assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
             assignments += f"\nif(FACT_{idx}) __CPROVER_assume({value});"
 
-        if respect_contra_table:
+        if respect_contra_table and False:
             log("Prevent selection of contradictory facts!")
             xor_facts = self.config['XOR_FACTS']
-            for (idx, value) in enumerate(F):
+            for (idx, value) in enumerate(self.facts):
                 if value in xor_facts:
                     log(f"> Contraction for {value} : {xor_facts[value]}")
                     for xf in xor_facts[value]:
-                        xidx = F.index(xf)
+                        xidx = self.facts.index(xf)
                         assignments += f"\n__CPROVER_assume( !FACT_{idx} || !FACT_{xidx});"
                 else:
                     log(f"> No contraction known for {value}")
@@ -306,7 +306,7 @@ class CBMCFactsMinimalism(object):
         # search.sub(new, smt2)
 
         named = ""
-        for idx, value in enumerate(self.config['USER_FACTS'] + self.config['AUTO_FACTS']):
+        for idx, value in enumerate(self.facts):
             named += f"\n(assert (! (= |main::1::FACT_{idx}!0@1#1| true) :named FACT_{idx}))"
         smt2 = smt2.replace("(check-sat)", named + "\n(check-sat)\n(get-unsat-core)")
 
@@ -325,13 +325,52 @@ class CBMCFactsMinimalism(object):
             unsat_core = lines[1].strip("()").split(" ")
             log("Required facts: ", unsat_core)
             selected_fact_ids = [int(x[len('FACT_'):]) for x in unsat_core]
-            facts = self.config['USER_FACTS'] + self.config['AUTO_FACTS']
-            selected_facts = [facts[i] for i in selected_fact_ids]
+            selected_facts = [self.facts[i] for i in selected_fact_ids]
             log("Selected facts", selected_facts)
             self.config['SELECTED_FACTS'] = selected_facts
         else:
-            log("Given set of facts are insufficient to guarantee output.")
+            log("Given set of facts are insufficient to guarantee the output.")
             sys.exit(2)
+
+
+def call_z3(smt_file):
+    log("Call ", f"z3 -smt2 {smt_file}")
+    ecode, out = subprocess.getstatusoutput(f"z3 -smt2 {smt_file}")
+    log(f"SMT result $?={ecode}")
+    return out
+
+
+REGEX_C2SMT = re.compile(r"(.*) (==|<=|>|<|>=|!=) (.*)")
+
+
+def c2smt(expr: str) -> str:
+    return REGEX_C2SMT.sub(r'(\2 \1 \3)', expr)
+
+
+def filter_facts(config):
+    facts = config['USER_FACTS'] + config['AUTO_FACTS']
+    inputs = config['INPUTS']
+    smt_problem = ""
+    for n, v in inputs.items():
+        smt_problem += f"(define-const {n} Int {v});\n"
+
+    for f1 in facts:
+        smt_problem += "\n(push)"
+        smt_problem += f"\n(assert {c2smt(f1)})"
+        smt_problem += "\n(check-sat)"
+        smt_problem += "\n(pop)"
+
+    contra_tmp_file = TMP_FOLDER / "filter_facts.smt2"
+    contra_tmp_file.write_text(smt_problem)
+    log("Write ", contra_tmp_file)
+    out = [idx for idx, x in enumerate(call_z3(contra_tmp_file).splitlines())
+           if x == 'sat']
+    print(out)
+    valid_facts = list(map(lambda x: facts[x], out))
+    log("Valid facts are: ")
+    for f in valid_facts:
+        log("  * ", f)
+    return valid_facts
 
 
 class RenameingPrinter(CGenerator):

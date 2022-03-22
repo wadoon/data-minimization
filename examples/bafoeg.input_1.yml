@@ -1,0 +1,11 @@
+AUTO_FACTS: [ ]
+USER_FACTS: [ ]
+
+INPUTS:
+  Ausbildungsstaette: 1
+  WohnhaftBeiDenEltern: 1
+  KVPVBeitraege: 0
+
+OUTPUTS:
+  Bedarfssatz: null
+
