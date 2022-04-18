@@ -71,6 +71,7 @@ def find(pred, seq):
     return None
 
 
+
 class SymbolicExecution(NodeVisitor):
     def __init__(self, cast: c_ast.FileAST):
         self.state: typing.Dict[str, str] = dict()
