@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from collections import defaultdict
@@ -44,8 +45,9 @@ class ExtractFactsByExec(object):
         trace_computation = list(e.computation_trace)
         trace_computation.reverse()
         for var in self.config['OUTPUTS'].keys():
-            last_assign: Assignment = find(lambda x: x is not None and isinstance(x, Assignment) and x.lvalue.name == var,
-                                           trace_computation)
+            last_assign: Assignment = find(
+                lambda x: x is not None and isinstance(x, Assignment) and x.lvalue.name == var,
+                trace_computation)
             if last_assign:
                 eq = BinaryOp("==", ID(var), last_assign.rvalue)
                 facts.append(out.visit(eq))
@@ -275,6 +277,51 @@ class CheckForContradiction(object):
         ecode, out = subprocess.getstatusoutput(f"z3 -smt2 {self.tmp_file}")
 
 
+def _augment_program(in_file: Path, out_file: Path, assume="", output="", header=""):
+    text = in_file.read_text()
+    text = text.replace('//%INPUT%', assume) \
+        .replace('//%OUTPUT%', output) \
+        .replace('//%HEADER%', header)
+    out_file.write_text(text)
+
+
+class CBMCSymbex(object):
+    def __init__(self, config, args, filename: Path):
+        self.config = config
+        self.args = args
+        self.filename = filename
+        self.tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_symbex.c")
+        self.run_command = f"cbmc --json-ui --trace {self.tmpfile}"
+
+    def run(self):
+        assignments = ""
+        outputs = ""
+        for (idx, value) in enumerate(self.config['USER_FACTS']):  # TODO weigl make facts configurable via CLI
+            log(f"> Add fact {value}")
+            assignments += f"\n__CPROVER_assume({value});"
+
+
+        outputs += f'\n__CPROVER_assert(0==1, "");'
+
+        _augment_program(self.filename, self.tmpfile, assignments, outputs)
+
+        log("Run CBMC:", self.run_command)
+        exitcode, output = subprocess.getstatusoutput(self.run_command)
+        jout = json.loads(output)
+        for entry in jout:
+            if "result" in entry:
+                result = entry['result'][0]['trace']
+                result.reverse()
+                for out in self.config['OUTPUTS'].keys():
+                    val = find(lambda x:
+                               'assignmentType' in x and \
+                               x["assignmentType"] == "variable" and x['lhs'] == out, result)
+                    if val:
+                        print(f"{out} = {int(val['value']['binary'],2)}")
+                    else:
+                        print(f"{out} = {val}")
+
+
 class CBMCFactsMinimalism(object):
     def __init__(self, config, args, filename: Path):
         self.config = config
@@ -286,7 +333,7 @@ class CBMCFactsMinimalism(object):
         self.facts = []
 
     def run(self):
-        self.facts = filter_facts(config)  # only satisfied facts are allowed
+        self.facts = filter_facts(self.config)  # only satisfied facts are allowed
         self._inject()
         self._generate_smt()
         self._execute()
@@ -410,7 +457,7 @@ def filter_facts(config):
 
 class RenameingPrinter(CGenerator):
     def __init__(self, name_prefix: str):
-        super().__init__(True)
+        super().__init__()
         self.suffix = name_prefix
 
     def visit_ID(self, n):
@@ -447,7 +494,6 @@ class RenameingPrinter(CGenerator):
                          n.init, n.bitsize, n.coord)
 
         return super().visit_Decl(new, no_type)
-
 
 class CBMCFactUniqueness(object):
     def __init__(self, config, args, filename):
@@ -557,6 +603,8 @@ def main():
 
     if args.mode == 'cbmc':
         pipeline = CBMCFactsMinimalism(config, program)
+    if args.mode == 'symbex':
+        pipeline = CBMCSymbex(config, args, program)
     elif args.mode == 'facts':
         pipeline = ExtractFacts(config, program)
     elif args.mode == 'rfacts':
