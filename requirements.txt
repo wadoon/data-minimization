@@ -1,4 +1,6 @@
 stackprinter~=0.2.5
 PyYAML~=6.0
 Arpeggio~=1.10.2
-pycparser
+pycparser~=2.20
+typing~=3.7.4.3
+click~=7.1.2

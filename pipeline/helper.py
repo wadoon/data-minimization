@@ -161,3 +161,60 @@ class SymbolicExecution(NodeVisitor):
                 self.defines[ssa_name] = c_ast.TernaryOp(cond, c_ast.ID(t), c_ast.ID(e))
                 state[k] = ssa_name
         return state
+
+
+class RenameingPrinter(CGenerator):
+    def __init__(self, name_prefix: str):
+        super().__init__()
+        self.suffix = name_prefix
+
+    def visit_ID(self, n):
+        return f"{n.name}{self.suffix}"
+
+    def visit_FuncCall(self, n):
+        fref = self._parenthesize_unless_simple(n.name)
+        return fref + '(' + self.visit(n.args) + ')'
+
+    def visit_FuncDef(self, n):
+        return super().visit_FuncDef(n)
+
+    def visit_FuncDecl(self, n):
+        return super().visit_FuncDecl(n)
+
+    def visit_Decl(self, n: c_ast.Decl, no_type=False):
+        nt = n.type
+        if isinstance(nt, c_ast.TypeDecl):
+            nt = c_ast.TypeDecl(nt.declname + self.suffix, nt.quals, nt.align, nt.type, nt.coord)
+        elif isinstance(nt, c_ast.FuncDecl):
+            a = nt.type
+            nt = c_ast.FuncDecl(nt.args,
+                                c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
+                                nt.coord)
+        elif isinstance(nt, c_ast.ArrayDecl):
+            a = nt.type
+            nt = c_ast.ArrayDecl(c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
+                                 nt.dim, nt.dim_quals, nt.coord)
+        else:
+            log("ERROR")
+
+        new = c_ast.Decl(n.name + self.suffix,
+                         n.quals, n.align, n.storage, n.funcspec, nt,
+                         n.init, n.bitsize, n.coord)
+
+        return super().visit_Decl(new, no_type)
+
+
+
+class EmbeddingPrinter(CGenerator):
+    def __init__(self, level, symex: SymbolicExecution):
+        super().__init__()
+        self.level = level
+        self.symex = symex
+
+    def visit_ID(self, n: c_ast.ID):
+        name = n.name
+        if self.level > 0 and name in self.symex.defines:
+            return EmbeddingPrinter(self.level - 1, self.symex).visit(self.symex.defines[name])
+        else:
+            return super().visit_ID(n)
+
