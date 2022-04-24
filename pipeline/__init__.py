@@ -1,9 +1,7 @@
-import argparse
 import json
 import os
 import re
 import subprocess
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -20,6 +18,24 @@ Z3 = "z3"
 CBMC = "cbmc"
 
 
+def group_options(*options):
+    def wrapper(function):
+        for option in reversed(options):
+            function = option(function)
+        return function
+
+    return wrapper
+
+
+ARG_CONFIG = click.argument("config", type=click.Path(exists=True))
+ARG_FILENAME = click.argument("filename", type=click.Path(exists=True))
+OPT_FACT_NAMES = click.option("-f", "--fact-names",
+                              help="Sets the key in the YAML of the facts to be used. " + \
+                                   "Typical you want USER_FACTS, AUTO_FACTS, or FACTS. " + \
+                                   "Multiple keys are allowed",
+                              multiple=True, default=['USER_FACTS'])
+
+
 def log(*args):
     print(">>>", *args)
 
@@ -28,12 +44,12 @@ def log(*args):
 @click.option('--debug/--no-debug', default=False)
 @click.option("-o", "--yaml-out", help="write updated config to a different file", metavar="FILE", type=click.Path())
 @click.option("--no-meta-update", help="disables the output of the meta-file", default=False, is_flag=True)
-@click.option("--tmp", help="Folder for temporary files", metavar="FOLDER", default="tmp", type=click.Path())
+@click.option("--tmp", help="Folder for temporary files", metavar="FOLDER", default=Path("./tmp"), type=click.Path())
 @click.option("--cbmc", help="Command/Path to execute CBMC. Settable via env. variable $CBMC", envvar="CBMC",
               default="cbmc")
 @click.option("--z3", help="Command/Path to execute Z3. Settable via env. variable Z3", envvar="Z3",
               default="z3")
-def cli(tmp, yaml_out, cbmc, z3):
+def cli(debug, tmp, yaml_out, cbmc, z3, no_meta_update):
     global TMP_FOLDER, ALTERNATIVE_YAML_OUT_FILENAME, Z3, CBMC
     TMP_FOLDER = tmp.absolute()
     TMP_FOLDER.mkdir(exist_ok=True)
@@ -45,30 +61,42 @@ def cli(tmp, yaml_out, cbmc, z3):
     if z3: Z3 = z3
 
 
-def load_config(fn):
+def _load_config(fn):
     with open(fn) as fh:
         return yaml.safe_load(fh)
+
+
+def _save_config(filename, value):
+    with open(filename if ALTERNATIVE_YAML_OUT_FILENAME is None else ALTERNATIVE_YAML_OUT_FILENAME, 'w') as fh:
+        yaml.safe_dump(value, fh)
 
 
 class auto_save_config:
     def __init__(self, fn: Path):
         self.fn = fn
-        self.alt_out = ALTERNATIVE_YAML_OUT_FILENAME
         self.config = None
 
     def __enter__(self):
-        self.config = load_config(self.fn)
+        self.config = _load_config(self.fn)
         return self.config
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        with open(self.fn if self.alt_out is None else self.alt_out, 'w') as fh:
-            yaml.safe_dump(self.config, fh)
+        if exc_val is None: _save_config(self.fn, self.config)
 
 
 @cli.command()
 @click.argument("config", type=click.Path(exists=True))
 @click.argument("filename", type=click.Path(exists=True))
 def extract_facts_fwd(config, filename):
+    """
+    Extracts facts by symbolical and concrete execution (fwd-calculi).
+
+
+    \f
+    :param config:
+    :param filename:
+    :return:
+    """
     with auto_save_config(config) as config:
         expressions = []
         facts = []
@@ -239,7 +267,7 @@ def fact_consistency(config: Path, filename: Path):
     """
 
     tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.c")
-    config = load_config(config)
+    config = _load_config(config)
 
     a = ""
     for (idx, value) in enumerate(config['USER_FACTS']):  # TODO weigl make facts configurable via CLI
@@ -261,7 +289,7 @@ def fact_incompatibility(config: Path, filename: Path):
     tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.smt2")
     program = """        """
 
-    config = load_config(config)
+    config = _load_config(config)
 
     for n in config['INPUTS'].keys():
         program += f"(declare-const {n} Int);\n"
@@ -329,23 +357,31 @@ def _augment_program(in_file: Path, out_file: Path, assume="", output="", header
     out_file.write_text(text)
 
 
-@cli.command()
-def symbex(config, filename: Path):
-    """
-    Determine the outcome of the given program under the given facts. Requires symbolic execution via CBMC.
+def _get_facts(config: dict, fact_names: typing.List[str]):
+    facts = []
+    for k in fact_names:
+        facts += config[k]
+    return facts
 
-    :param config:
-    :param filename:
-    :return:
+
+@cli.command()
+@group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
+@click.option("-s", "--set-output-values", default=False, is_flag=True)
+def symbex(config, filename: Path, fact_names: typing.List[str], set_output_values):
     """
-    config = config
+    Compute outcome based on a set of facts. Determine the outcome of the given program under the given symbolic facts.
+    Uses CBMC to generate a counter-example.
+
+    FILENAME is the path to an augmentable C-program, and CONFIG points to YAML file containing the meta-data.
+    """
+    cfg = _load_config(config)
     filename = filename
     tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_symbex.c")
     run_command = f"cbmc --json-ui --trace {tmpfile}"
 
     assignments = ""
     outputs = ""
-    for (idx, value) in enumerate(config['USER_FACTS']):  # TODO weigl make facts configurable via CLI
+    for (idx, value) in enumerate(_get_facts(cfg, fact_names)):
         log(f"> Add fact {value}")
         assignments += f"\n__CPROVER_assume({value});"
 
@@ -360,14 +396,21 @@ def symbex(config, filename: Path):
         if "result" in entry:
             result = entry['result'][0]['trace']
             result.reverse()
-            for out in config['OUTPUTS'].keys():
+            for out in cfg['OUTPUTS'].keys():
                 val = find(lambda x:
-                           'assignmentType' in x and \
-                           x["assignmentType"] == "variable" and x['lhs'] == out, result)
+                           'assignmentType' in x \
+                           and x["assignmentType"] == "variable" \
+                           and x['lhs'] == out, result)
                 if val:
-                    print(f"{out} = {int(val['value']['binary'], 2)}")
+                    v = int(val['value']['binary'], 2)
+                    print(f"{out} = {v}")
+                    if set_output_values:
+                        cfg['OUTPUTS'][out] = v
                 else:
                     print(f"{out} = {val}")
+
+    if set_output_values:
+        _save_config(config, cfg)
 
 
 @cli.command()
@@ -568,57 +611,44 @@ def unique_selfcomp(config, filename, eqin=True):
     sys.exit(os.system(run_command))
 
 
-def get_cli():
-    a = argparse.ArgumentParser()
-    a.add_argument("--mode", help="Operation mode")
-    a.add_argument("-o", help="write updated config to different file")
-    a.add_argument("--ignore_xor_facts", help="", default=False)
-    a.add_argument("--datatype", help="int or float", default="int")
-    a.add_argument("--tmp", help="Folder for temporary files", metavar="FOLDER", default="tmp")
-    a.add_argument("--eqin", help="", default=True)
-    a.add_argument("config", help="meta data of the given program")
-    a.add_argument("program", help="a C-program file")
-    return a
-
-
 cli.add_command(extract_facts_fwd)
 
 
 def main():
     cli()
 
+#
+# def main0():
+#     ap = get_cli()
+#     args = ap.parse_args()
+#
+#     program = Path(args.program)
+#
+#     TMP_FOLDER = Path(args.tmp).absolute()
+#     TMP_FOLDER.mkdir(exist_ok=True)
+#
+#     with open(args.config) as fh:
+#         config = yaml.safe_load(fh)
 
-def main0():
-    ap = get_cli()
-    args = ap.parse_args()
+# if args.mode == 'cbmc':
+#    pipeline = CBMCFactsMinimalism(config, program)
+# elif args.mode == 'facts':
+#    pipeline = ExtractFacts(config, program)
+# elif args.mode == 'rfacts':
+#    pipeline = extract_facts_fwd(config, program)
+# elif args.mode == 'selfcomp':
+#       pipeline = CBMCFactUniqueness(config, args, program)
+# elif args.mode == 'check':
+#    pipeline = CBMCFactsMinimalism(config, args, program)
+# elif args.mode == 'run':
+#    pipeline = ExecutePipeline(config, program)
+# elif args.mode == 'check_contra':
+#    pipeline = CheckForContradiction(config, program)
+# else:
+#    log(f"Unknown mode {args.mode} given.")
+#    sys.exit(1)
 
-    program = Path(args.program)
-
-    TMP_FOLDER = Path(args.tmp).absolute()
-    TMP_FOLDER.mkdir(exist_ok=True)
-
-    with open(args.config) as fh:
-        config = yaml.safe_load(fh)
-
-    # if args.mode == 'cbmc':
-    #    pipeline = CBMCFactsMinimalism(config, program)
-    # elif args.mode == 'facts':
-    #    pipeline = ExtractFacts(config, program)
-    # elif args.mode == 'rfacts':
-    #    pipeline = extract_facts_fwd(config, program)
-    # elif args.mode == 'selfcomp':
-    #       pipeline = CBMCFactUniqueness(config, args, program)
-    # elif args.mode == 'check':
-    #    pipeline = CBMCFactsMinimalism(config, args, program)
-    # elif args.mode == 'run':
-    #    pipeline = ExecutePipeline(config, program)
-    # elif args.mode == 'check_contra':
-    #    pipeline = CheckForContradiction(config, program)
-    # else:
-    #    log(f"Unknown mode {args.mode} given.")
-    #    sys.exit(1)
-
-    # pipeline.run()
-
-    with open(args.config if args.o is None else args.o, 'w') as fh:
-        yaml.safe_dump(config, fh)
+# pipeline.run()
+#
+# with open(args.config if args.o is None else args.o, 'w') as fh:
+#     yaml.safe_dump(config, fh)
