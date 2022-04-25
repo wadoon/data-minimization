@@ -1,8 +1,9 @@
+import pprint
 import typing
 
 from pycparser import c_ast
 from pycparser.c_ast import *
-
+import numpy as np
 from .helper import find
 
 
@@ -31,7 +32,7 @@ class MemoryModel:
 
 
 def is_concrete(value):
-    return type(value) in (int, bool, float)
+    return not isinstance(value, c_ast.Node)
 
 
 def eval_binary(op, left, right):
@@ -108,11 +109,11 @@ class ExpressionRewriter(NodeVisitor):
 
     def visit_Constant(self, node: c_ast.Constant):
         if node.type == 'int':
-            return int(node.value)
+            return np.int32(node.value)
         elif node.type == 'boolean':
             return "true" == node.value
         elif node.type == 'float':
-            return float(node.value)
+            return np.int32(node.value) # np.float(node.value)
         else:
             assert False
 
@@ -126,6 +127,11 @@ class ExpressionRewriter(NodeVisitor):
             n_left = left if not is_concrete(left) else Constant("int", value=left)
             n_right = right if not is_concrete(right) else Constant("int", value=right)
             return BinaryOp(node.op, n_left, n_right)
+
+    def visit_ArrayRef(self, node: c_ast.ArrayRef):
+        idx = NodeVisitor.visit(self, node.subscript)
+        ary = self.memory[node.name.name]
+        return ary[int(idx)]
 
     def visit_UnaryOp(self, node: c_ast.UnaryOp):
         value = NodeVisitor.visit(self, node.expr)
@@ -149,18 +155,30 @@ class Evaluator(NodeVisitor):
         self.computation_trace: typing.List[c_ast.Node] = []
         self.expr_rewriter = ExpressionRewriter(self.memory, self.config)
 
+        self.memory.push()
         self.init_global_state()
+        self.init_input()
         self.call()
+
+    def visit_InitList(self, node: InitList):
+        ary = list()
+        for e in node.exprs:
+            ary.append(NodeVisitor.visit(self, e))
+        return ary
+
 
     def init_global_state(self):
         for c in self.file_ast:
             if isinstance(c, c_ast.Decl) and not isinstance(c.type, c_ast.FuncDecl):
                 if c.init is not None:
-                    self.memory.global_data[c.name] = self.visit(c.init)
+                    v = self.visit(c.init)
+                    assert (v is not None, f"{c.init}")
+                    self.memory.global_data[c.name] = v
+                    print(f">>> Assign {c.name} = {v}")
                 else:
                     match c.type.type:
                         case IdentifierType(names=['int']):
-                            self.memory.global_data[c.name] = 0
+                            self.memory.global_data[c.name] = np.int32(0)
                         case _:
                             assert False;
 
@@ -186,11 +204,11 @@ class Evaluator(NodeVisitor):
 
     def visit_Constant(self, node: c_ast.Constant):
         if node.type == 'int':
-            return int(node.value)
+            return np.int32(node.value)
         elif node.type == 'boolean':
             return "true" == node.value
         elif node.type == 'float':
-            return float(node.value)
+            return np.int32(node.value) # np.float(node.value)
         else:
             assert False
 
@@ -201,9 +219,10 @@ class Evaluator(NodeVisitor):
             Assignment(node.op, node.lvalue,
                        svalue if not is_concrete(svalue) else Constant('int', svalue)))
 
-        value = NodeVisitor.visit(self, node.rvalue)
+        value = np.int32( NodeVisitor.visit(self, node.rvalue) )
         name = node.lvalue.name
         self.memory[name] = value
+        print(f"Execute assignment {name} = {value} {type(value)} ({node.coord})")
 
     def visit_If(self, node: c_ast.If):
         cond = NodeVisitor.visit(self, node.cond)
@@ -274,3 +293,15 @@ class Evaluator(NodeVisitor):
 
     def visit_ID(self, node: c_ast.ID):
         return self.memory[node.name]
+
+    def visit_ArrayRef(self, node: c_ast.ArrayRef):
+        idx = NodeVisitor.visit(self, node.subscript)
+        ary = self.memory[node.name.name]
+        return ary[int(idx)]
+
+    def init_input(self):
+        for var, value in self.config['INPUTS'].items():
+            if value:
+                v = np.int32(value)
+                self.memory.global_data[var] = v
+                print(f">>> Assign by input {var} = {v}")

@@ -1,0 +1,193 @@
+AUTO_FACTS:
+- '!(KRV < 2000)'
+- PVS == 1000
+- PVZ == 1000
+- LZZ == 1000
+- '!false'
+- '!(VJAHR < 2006000)'
+- VJAHR < 2040000
+- LZZ == 1000
+- 'true'
+- 'true'
+- ALTER1 == 0
+- '!(STKL < 6000)'
+- '!(STKL == 1000)'
+- '!(STKL == 2000)'
+- '!(STKL == 3000)'
+- '!(STKL == 4000)'
+- '!(STKL == 5000)'
+- KRV > 1000
+- '!(STKL == 3000)'
+- PKV > 0
+- '!(STKL == 6000)'
+- PKV == 2000
+- 'true'
+- 'true'
+- '!false'
+- '!(STKL < 5000)'
+- '!false'
+- 'true'
+- 'true'
+- 'true'
+- LZZ == 1000
+- PKV > 0
+- 'true'
+- LZZ == 1000
+- ZKF > 0
+- KRV > 1000
+- '!(STKL == 3000)'
+- PKV > 0
+- '!(STKL == 6000)'
+- PKV == 2000
+- 'true'
+- 'true'
+- '!false'
+- '!(STKL < 5000)'
+- '!false'
+- 'true'
+- 'true'
+- 'true'
+- 'true'
+- 'true'
+- LZZ == 1000
+- R > 0
+- LZZ == 1000
+INPUTS:
+  AJAHR: 0
+  ALTER1: 0
+  ENTSCH: 0
+  JFREIB: 0
+  JHINZU: 0
+  JRE4: 1
+  JRE4ENT: 1
+  JVBEZ: 1
+  KRV: 1073742825
+  KVZ: 589824005
+  LZZ: 1000
+  LZZFREIB: 43866
+  LZZHINZU: 2137759847
+  MBV: 1
+  PKPV: 1114906240
+  PKV: 2000
+  PVS: 1000
+  PVZ: 1000
+  R: 1
+  RE4: 360780
+  SONSTB: 0
+  SONSTENT: 0
+  STERBE: 0
+  STKL: 536873912
+  VBEZ: 13270266
+  VBEZM: 1744830464
+  VBEZS: 596170882
+  VBS: 1
+  VJAHR: 2008433
+  VKAPA: 0
+  VMT: 0
+  ZKF: 268435456
+  ZMVB: 756398995
+  af: 0
+  f: 0
+INTERNALS:
+  ALTE: null
+  ANP: null
+  ANTEIL1: null
+  BBGKVPV: null
+  BBGRV: null
+  BMG: null
+  DIFF: null
+  EFA: null
+  FVB: null
+  FVBSO: null
+  FVBZ: null
+  FVBZSO: null
+  GFB: null
+  HBALTE: null
+  HFVB: null
+  HFVBZ: null
+  HFVBZSO: null
+  HOCH: null
+  J: null
+  JBMG: null
+  JLFREIB: null
+  JLHINZU: null
+  JW: null
+  K: null
+  KENNVMT: null
+  KFB: null
+  KVSATZAG: null
+  KVSATZAN: null
+  KZTAB: null
+  LST1: null
+  LST2: null
+  LST3: null
+  LSTJAHR: null
+  LSTOSO: null
+  LSTSO: null
+  MIST: null
+  PVSATZAG: null
+  PVSATZAN: null
+  RVSATZAN: null
+  RW: null
+  SAP: null
+  SOLZFREI: null
+  SOLZJ: null
+  SOLZMIN: null
+  SOLZSBMG: null
+  SOLZSZVE: null
+  SOLZVBMG: null
+  ST: null
+  ST1: null
+  ST2: null
+  STOVMT: null
+  TBSVORV: null
+  VBEZB: null
+  VBEZBSO: null
+  VERGL: null
+  VHB: null
+  VKV: null
+  VSP: null
+  VSP1: null
+  VSP2: null
+  VSP3: null
+  VSPMAX1: null
+  VSPMAX2: null
+  VSPN: null
+  VSPO: null
+  VSPREST: null
+  VSPVOR: null
+  W1STKL5: null
+  W2STKL5: null
+  W3STKL5: null
+  X: null
+  Y: null
+  ZRE4: null
+  ZRE4J: null
+  ZRE4VP: null
+  ZTABFB: null
+  ZVBEZ: null
+  ZVBEZJ: null
+  ZVE: null
+  ZX: null
+  ZZX: null
+  bd: null
+OUTPUTS:
+  BK: 42877952
+  BKS: 0
+  BKV: 0
+  LSTLZZ: 42877952
+  SOLZLZZ: -1099000000
+  SOLZS: 0
+  SOLZV: 0
+  STS: 0
+  STV: 0
+  VFRB: -601200000
+  VFRBS1: 0
+  VFRBS2: 0
+  VKVLZZ: 36000000
+  VKVSONST: 0
+  WVFRB: 735612672
+  WVFRBM: 0
+  WVFRBO: 0
+SELECTED_FACTS:
+- '!(KRV < 2000)'

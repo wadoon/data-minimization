@@ -13,7 +13,7 @@ from .evaluator import Evaluator
 from .helper import *
 
 TMP_FOLDER: Path = Path("./tmp").absolute()
-ALTERNATIVE_YAML_OUT_FILENAME: Path
+ALTERNATIVE_YAML_OUT_FILENAME: Path = None
 Z3 = "z3"
 CBMC = "cbmc"
 
@@ -27,8 +27,8 @@ def group_options(*options):
     return wrapper
 
 
-ARG_CONFIG = click.argument("config", type=click.Path(exists=True))
-ARG_FILENAME = click.argument("filename", type=click.Path(exists=True))
+ARG_CONFIG = click.argument("config", type=PPath(exists=True))
+ARG_FILENAME = click.argument("filename", type=PPath(exists=True))
 OPT_FACT_NAMES = click.option("-f", "--fact-names",
                               help="Sets the key in the YAML of the facts to be used. " + \
                                    "Typical you want USER_FACTS, AUTO_FACTS, or FACTS. " + \
@@ -67,7 +67,12 @@ def _load_config(fn):
 
 
 def _save_config(filename, value):
-    with open(filename if ALTERNATIVE_YAML_OUT_FILENAME is None else ALTERNATIVE_YAML_OUT_FILENAME, 'w') as fh:
+    global ALTERNATIVE_YAML_OUT_FILENAME
+    if ALTERNATIVE_YAML_OUT_FILENAME:
+        target = ALTERNATIVE_YAML_OUT_FILENAME
+    else:
+        target = filename
+    with open(target, 'w') as fh:
         yaml.safe_dump(value, fh)
 
 
@@ -85,49 +90,49 @@ class auto_save_config:
 
 
 @cli.command()
-@click.argument("config", type=click.Path(exists=True))
-@click.argument("filename", type=click.Path(exists=True))
-def extract_facts_fwd(config, filename):
-    """
-    Extracts facts by symbolical and concrete execution (fwd-calculi).
+@group_options(ARG_CONFIG, ARG_FILENAME)
+@click.option("-f", "--fact-name", default="AUTO_FACTS")
+def extract_facts_fwd(config, filename, fact_name):
+    """Extracts facts by symbolical and concrete execution (fwd-calculi)."""
 
-
-    \f
-    :param config:
-    :param filename:
-    :return:
-    """
     with auto_save_config(config) as config:
-        expressions = []
-        facts = []
-        ast: c_ast.FileAST = pycparser.parse_file(filename, True, cpp_args="-DNOHEADER=1")
+        ast: c_ast.FileAST = pycparser.parse_file(filename, True,
+                                                  cpp_args="-DNOHEADER=1")
         e = Evaluator(ast, config)
         out = CGenerator()
         local_facts = []
         for s in e.computation_trace:
             if isinstance(s, c_ast.FuncCall):
                 txt = out.visit(s.args)
-                local_facts.append(txt)
+                local_facts.append(txt.replace("False","false").replace('True','true'))
 
         trace_computation = list(e.computation_trace)
         trace_computation.reverse()
         for var in config['OUTPUTS'].keys():
+            log(f"Output constraint {var}")
             last_assign: Assignment = find(
                 lambda x: x is not None and isinstance(x, Assignment) and x.lvalue.name == var,
                 trace_computation)
+            value = e.memory[var]
+            log(f"Value of {var}: {value}")
             if last_assign:
-                eq = BinaryOp("==", ID(var), last_assign.rvalue)
-                local_facts.append(out.visit(eq))
+                expr = last_assign.rvalue
+                svalue = e.expr_rewriter.visit(expr)
+                log(f"Symbolic value of {var}: {svalue}")
+                if not isinstance(svalue, c_ast.Node):
+                    if svalue == value: continue
+                    svalue = Constant('int', svalue)
+                if svalue != value:
+                    eq = BinaryOp("==", svalue, Constant('int', value))
+                    local_facts.append(out.visit(eq))
             else:
-                print(f"No assigment found for {var}")
+                log(f"No assigment found for {var} in computation trace")
 
-        if 'AUTO_FACTS' not in config:
-            config['AUTO_FACTS'] = []
-
-        config['AUTO_FACTS'] += local_facts
+        config[fact_name] = local_facts
 
 
 @cli.command()
+@group_options(ARG_CONFIG, ARG_FILENAME)
 def extract_facts(config, filename):
     expressions = []
     ast: c_ast.FileAST
@@ -213,7 +218,9 @@ def extract_facts(config, filename):
 
 
 @cli.command()
-def execute(config, filename: Path, store_output=True):
+@group_options(ARG_CONFIG, ARG_FILENAME)
+@click.option("--store-output", default=True, is_flag=True)
+def execute(config, filename: Path, store_output):
     """
     Executes the given program by compiling  and injecting the concrete values givne in the meta-file.
 
@@ -221,19 +228,22 @@ def execute(config, filename: Path, store_output=True):
     :param filename: path to C-program
     :param store_output:  set to True if the output should be stored in the meta-file
     """
+    print(type(filename))
     tmpfile = TMP_FOLDER / (filename.stem + "_run.c")
     executable = TMP_FOLDER / (filename.stem + "_run")
     prepare_command = "gcc -o %s %s" % (executable, tmpfile)
     run_command = executable
 
+    cfg = _load_config(config)
+
     def _inject():
         log("Inject input assignments")
         assignments = ""
-        for (name, value) in config['INPUTS'].items():
+        for (name, value) in cfg['INPUTS'].items():
             assignments += f"\n{name} = {value};"
 
         outputs = '\nprintf("\\nOUTPUTS:\\n");'
-        for name in config['OUTPUTS'].keys():
+        for name in cfg['OUTPUTS'].keys():
             outputs += f'\nprintf("  {name}: %d\\n", {name});'
 
         _augment_program(filename, tmpfile, assignments, outputs, '#include <stdio.h>')
@@ -248,9 +258,11 @@ def execute(config, filename: Path, store_output=True):
         log("Run executable:", run_command)
         output = subprocess.check_output(run_command).decode()
         log(output)
-        log("Update output assignments in the given YAML file")
-        output = yaml.safe_load(output)
-        config['OUTPUTS'] = output['OUTPUTS']
+        if store_output:
+            log("Update output assignments in the given YAML file")
+            output = yaml.safe_load(output)
+            cfg['OUTPUTS'] = output['OUTPUTS']
+            _save_config(config, cfg)
 
     _inject()
     _compile()
@@ -258,19 +270,22 @@ def execute(config, filename: Path, store_output=True):
 
 
 @cli.command()
-def fact_consistency(config: Path, filename: Path):
+@group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
+def fact_consistency(config: Path, filename: Path, fact_names: typing.List[str]):
     """
-
-    :param config:
-    :param filename:
-    :return:
+    Checks the consistency (abscence of contradiction) facts
+    on the given facts.
     """
+    log("Using given fact keys:", fact_names)
 
     tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.c")
     config = _load_config(config)
 
     a = ""
-    for (idx, value) in enumerate(config['USER_FACTS']):  # TODO weigl make facts configurable via CLI
+    for var in config['INPUTS']:
+        a += f"\n{var}=nondet_int();"
+
+    for (idx, value) in enumerate(_get_facts(config, fact_names)):
         log(f"> Add fact {value}")
         a += f"\n__CPROVER_assume({value});"
     _augment_program(filename, tmp_file, assume=a + "assert(false);return 0;")
@@ -278,16 +293,57 @@ def fact_consistency(config: Path, filename: Path):
     run_command = f"cbmc {tmp_file}"
     exitcode, _ = subprocess.getstatusoutput(run_command)
     if exitcode != 0:
-        log("Successful: Facts are consistent")
+        log(f"Successful: Facts are consistent {exitcode}==0")
+        return True
     else:
-        log("Error: Facts are inconsistent")
-        sys.exit(0)
+        log(f"Error: Facts are inconsistent {exitcode}==0")
+        sys.exit(1)
+        # return False
 
 
 @cli.command()
-def fact_incompatibility(config: Path, filename: Path):
+@group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
+def facts_preciseness(config, filename, fact_names):
+    """Checks the preciseness of the given facts
+    to achieve the desired outcome.
+    """
+
+    tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_preciseness_check.c")
+    config = _load_config(config)
+
+    a = ""
+    b = ""
+
+    a = ""
+    for var in config['INPUTS']:
+        a += f"\n{var}=nondet_int();"
+
+    for (idx, value) in enumerate(_get_facts(config, fact_names)):
+        log(f"> Add fact {value}")
+        a += f"\n__CPROVER_assume({value});"
+
+    for (out, value) in config['OUTPUTS'].items():
+        log(f"> Add assertion {out} == {value}")
+        b += f"\n__CPROVER_assert({out}=={value}, \"Output {out}\");"
+
+    _augment_program(filename, tmp_file, a, b)
+
+    run_command = f"cbmc {tmp_file}"
+    exitcode, _ = subprocess.getstatusoutput(run_command)
+    if exitcode == 0:
+        log(f"Successful: Facts are precise {exitcode}==0")
+        return True
+    else:
+        log("Error: Facts are imprecise")
+        sys.exit(1)
+        # return False
+
+
+@cli.command()
+@group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
+def fact_incompatibility(config: Path, filename: Path, fact_names: typing.List[str]):
     tmp_file = TMP_FOLDER / (filename.stem + "_cbmc_contracheck.smt2")
-    program = """        """
+    program = """"""
 
     config = _load_config(config)
 
@@ -299,7 +355,7 @@ def fact_incompatibility(config: Path, filename: Path):
     def postfix(s):
         return regex.sub(r'(\2 \1 \3)', s)
 
-    F = config['AUTO_FACTS'] + config['USER_FACTS']
+    F = _get_facts(config, fact_names)
     facts = list(map(postfix, F))
 
     for f1 in facts:
@@ -414,20 +470,22 @@ def symbex(config, filename: Path, fact_names: typing.List[str], set_output_valu
 
 
 @cli.command()
-@click.option("--ignore-xor-facts", default=True, type=click.BOOL)
-def minimze_facts_core(config, filename: Path, ignore_xor_facts=False):
+@group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
+#@click.option("--ignore-xor-facts", default=True, type=click.BOOL)
+def minimize_facts_core(config, filename: Path, fact_names):
     tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.c")
     smt_file = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.smt2")
     prepare_command = f"cbmc --z3 --outfile {smt_file} {tmpfile}"
-    facts = filter_facts(config)  # only satisfied facts are allowed
+    cfg = _load_config(config)
+    facts = _get_facts(cfg, fact_names)
+    # facts = filter_facts(facts)  # only satisfied facts are allowed
 
     def _inject():
-        respect_contra_table = 'XOR_FACTS' in config and \
-                               len(config['XOR_FACTS']) > 0 and \
-                               not ignore_xor_facts
+        # respect_contra_table = 'XOR_FACTS' in config and \
+        #                       len(config['XOR_FACTS']) > 0 and \
+        #                       not ignore_xor_facts
 
         log("Inject fact as assumption")
-        text = filename.read_text()
 
         assignments = "__CPROVER_bool TRUE = 1; //A constant which is always true\n"
         for (idx, value) in enumerate(facts):
@@ -436,27 +494,25 @@ def minimze_facts_core(config, filename: Path, ignore_xor_facts=False):
             # assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
             assignments += f"\nif(FACT_{idx}) __CPROVER_assume({value});"
 
-        if respect_contra_table and False:
-            log("Prevent selection of contradictory facts!")
-            xor_facts = config['XOR_FACTS']
-            for (idx, value) in enumerate(facts):
-                if value in xor_facts:
-                    log(f"> Contraction for {value} : {xor_facts[value]}")
-                    for xf in xor_facts[value]:
-                        xidx = facts.index(xf)
-                        assignments += f"\n__CPROVER_assume( !FACT_{idx} || !FACT_{xidx});"
-                else:
-                    log(f"> No contraction known for {value}")
+        # if respect_contra_table and False:
+        #    log("Prevent selection of contradictory facts!")
+        #    xor_facts = config['XOR_FACTS']
+        #    for (idx, value) in enumerate(facts):
+        #        if value in xor_facts:
+        #            log(f"> Contraction for {value} : {xor_facts[value]}")
+        #            for xf in xor_facts[value]:
+        #                xidx = facts.index(xf)
+        #                assignments += f"\n__CPROVER_assume( !FACT_{idx} || !FACT_{xidx});"
+        #        else:
+        #            log(f"> No contraction known for {value}")
 
         log(f"Inject output as assertions")
         outputs = ""
-        for (name, value) in config['OUTPUTS'].items():
+        for (name, value) in cfg['OUTPUTS'].items():
             log(f"> Add output {name} == {value}")
             outputs += f'\n__CPROVER_assert({name} == {value}, "Output: {name}");'
 
-        text = text.replace('//%INPUT%', assignments).replace('//%OUTPUT%', outputs)
-
-        tmpfile.write_text(text)
+        _augment_program(filename, tmpfile, assignments, outputs)
 
     def _generate_smt():
         log("Generate SMT file: ", prepare_command)
@@ -483,8 +539,9 @@ def minimze_facts_core(config, filename: Path, ignore_xor_facts=False):
             fh.write(smt2)
 
     def _execute():
-        log("Run SMT2 solver: z3 -smt2 ", smt_file)
-        exitcode, output = subprocess.getstatusoutput(f"z3 -smt2 {smt_file}")
+        cmd = f"z3 -smt2 {smt_file}"
+        log("Run SMT2 solver: ", cmd)
+        exitcode, output = subprocess.getstatusoutput(cmd)
         lines = output.split("\n")
         if lines[0] == "unsat":
             unsat_core = lines[1].strip("()").split(" ")
@@ -492,7 +549,8 @@ def minimze_facts_core(config, filename: Path, ignore_xor_facts=False):
             selected_fact_ids = [int(x[len('FACT_'):]) for x in unsat_core]
             selected_facts = [facts[i] for i in selected_fact_ids]
             log("Selected facts", selected_facts)
-            config['SELECTED_FACTS'] = selected_facts
+            cfg['SELECTED_FACTS'] = selected_facts
+            _save_config(config, cfg)
         else:
             log("Given set of facts are insufficient to guarantee the output.")
             sys.exit(2)
@@ -516,8 +574,7 @@ def c2smt(expr: str) -> str:
     return REGEX_C2SMT.sub(r'(\2 \1 \3)', expr)
 
 
-def filter_facts(config):
-    facts = config['USER_FACTS'] + config['AUTO_FACTS']
+def filter_facts(config, facts):
     inputs = config['INPUTS']
     smt_problem = ""
     for n, v in inputs.items():

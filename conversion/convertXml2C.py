@@ -143,11 +143,13 @@ def replace(regex, replacement):
 
 def translateExpr(x):
     v = parse(x.group(1))
+    #print(f"{v}\n{x.group(1)}\n\n");
     return f"{v};"
 
 
 def translateIfExpr(x):
     b = parse(x.group(1))
+    #print(f"{b}\n{x.group(1)}\n\n");
     return f"if({b})"
 
 
@@ -214,6 +216,7 @@ if mode:
     replace(r'\bdouble\b', 'int')
     replace(r'_double', '_int')
     replace(r'\b\d+(\.\d*)?\b', lambda x: str(int(float(x.group()) * 1000)))
+    # replace(r'\b\d+(\.\d*)?\b', lambda x: str(int(float(x.group()) * 1)))
     replace(r'round_(up|down)\((.*), \d+\)', r'\2')
     replace(r'\[K\]', '[K/1000]') # access to arrays
     replace(r'\[J\]', '[J/1000]') # access to arrays

@@ -1,3 +1,4 @@
+import pathlib
 import typing
 
 from pycparser import c_ast
@@ -69,7 +70,6 @@ def find(pred, seq):
     for tl in seq:
         if pred(tl): return tl
     return None
-
 
 
 class SymbolicExecution(NodeVisitor):
@@ -195,14 +195,13 @@ class RenameingPrinter(CGenerator):
             nt = c_ast.ArrayDecl(c_ast.TypeDecl(a.declname + self.suffix, a.quals, a.align, a.type, a.coord),
                                  nt.dim, nt.dim_quals, nt.coord)
         else:
-            log("ERROR")
+            print(">>> ERROR")
 
         new = c_ast.Decl(n.name + self.suffix,
                          n.quals, n.align, n.storage, n.funcspec, nt,
                          n.init, n.bitsize, n.coord)
 
         return super().visit_Decl(new, no_type)
-
 
 
 class EmbeddingPrinter(CGenerator):
@@ -218,3 +217,23 @@ class EmbeddingPrinter(CGenerator):
         else:
             return super().visit_ID(n)
 
+
+import click
+
+
+class PPath(click.Path):
+    """
+    A Click path argument that returns a ``Path``, not a string.
+    """
+
+    def convert(
+            self,
+            value: str,
+            param: click.core.Parameter | None,
+            ctx: click.core.Context | None,
+    ) -> typing.Any:
+        """
+        Return a ``Path`` from the string ``click`` would have created with
+        the given options.
+        """
+        return pathlib.Path(super().convert(value=value, param=param, ctx=ctx))

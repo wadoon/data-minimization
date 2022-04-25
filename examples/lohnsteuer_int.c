@@ -47,25 +47,25 @@ int AJAHR;
 /*  1000, wenn das 64000. Lebensjahr zu Beginn des Kalenderjahres vollendet
    wurde, in dem der Lohnzahlungszeitraum endet (§ 24000 a EStG), sonst = 0  */
 int ALTER1;
-/*  in VKAPA und VMT enthaltene Entschädigungen nach §24000 Nummer 1000 EStG
-                     sowie tarifermäßigt zu besteuernde Vorteile bei
+/* in VKAPA und VMT enthaltene Entschädigungen nach §24000 Nummer 1000 EStG
+   sowie tarifermäßigt zu besteuernde Vorteile bei
    Vermögensbeteiligungen (§ 19a Absatz 4000 EStG) in Cent  */
 int ENTSCH = (int)0;
 /*  eingetragener Faktor mit drei Nachkommastellen  */
 int f = 1000;
 /*  Jahresfreibetrag für die Ermittlung der Lohnsteuer für die sonstigen Bezüge
-                     sowie für Vermögensbeteiligungen nach § 19a Absatz 1000 und
+   sowie für Vermögensbeteiligungen nach § 19a Absatz 1000 und
    4000 EStG nach Maßgabe der elektronischen Lohnsteuerabzugsmerkmale nach § 39e
    EStG oder der Eintragung auf der Bescheinigung für den Lohnsteuerabzug
    2022000 in Cent (ggf. 0)  */
 int JFREIB;
-/*  Jahreshinzurechnungsbetrag für die Ermittlung der Lohnsteuer für die
+/* Jahreshinzurechnungsbetrag für die Ermittlung der Lohnsteuer für die
    sonstigen Bezüge sowie für Vermögensbeteiligungen nach § 19a Absatz 1000 und
    4000 EStG nach Maßgabe der elektronischen Lohnsteuerabzugsmerkmale nach § 39e
    EStG oder der Eintragung auf der Bescheinigung für den Lohnsteuerabzug
    2022000 in Cent (ggf. 0)  */
 int JHINZU;
-/*  Voraussichtlicher Jahresarbeitslohn ohne sonstige Bezüge (d.h. auch ohne
+/* Voraussichtlicher Jahresarbeitslohn ohne sonstige Bezüge (d.h. auch ohne
    Vergütung für mehrjährige Tätigkeit und ohne die zu besteuernden Vorteile bei
    Vermögensbeteiligungen, § 19a Absatz 4000 EStG) in Cent. Anmerkung: Die
    Eingabe dieses Feldes (ggf. 0) ist erforderlich bei Eingaben zu sonstigen
@@ -80,13 +80,13 @@ int JRE4;
 /*  In JRE4 enthaltene Versorgungsbezuege in Cents (ggf. 0)  */
 int JVBEZ;
 /* Merker für die Vorsorgepauschale
-                                2000 = der Arbeitnehmer ist NICHT in der
+   2000 = der Arbeitnehmer ist NICHT in der
    gesetzlichen Rentenversicherung versichert.
 
-                                1000 = der Arbeitnehmer ist in der gesetzlichen
+   1000 = der Arbeitnehmer ist in der gesetzlichen
    Rentenversicherung versichert, es gilt die Beitragsbemessungsgrenze OST.
 
-                                0 = der Arbeitnehmer ist in der gesetzlichen
+   0 = der Arbeitnehmer ist in der gesetzlichen
    Rentenversicherung versichert, es gilt die Beitragsbemessungsgrenze WEST.  */
 int KRV;
 /*  Einkommensbezogener Zusatzbeitragssatz eines gesetzlich krankenversicherten
@@ -101,7 +101,7 @@ int KVZ;
                      3000 = Woche
                      4000 = Tag  */
 int LZZ;
-/*  Der als elektronisches Lohnsteuerabzugsmerkmal für den Arbeitgeber nach §
+/* Der als elektronisches Lohnsteuerabzugsmerkmal für den Arbeitgeber nach §
    39e EStG festgestellte oder in der Bescheinigung für den Lohnsteuerabzug
    2022000 eingetragene Freibetrag für den Lohnzahlungszeitraum in Cent  */
 int LZZFREIB;
@@ -114,7 +114,7 @@ int LZZHINZU;
                      (§ 19a Absatz 1000 Satz 4000 EStG) in Cent  */
 int MBV;
 /*  Dem Arbeitgeber mitgeteilte Zahlungen des Arbeitnehmers zur privaten
-                     Kranken- bzw. Pflegeversicherung im Sinne des §10000 Abs.
+    Kranken- bzw. Pflegeversicherung im Sinne des §10000 Abs.
    1000 Nr. 3000 EStG 2010000 als Monatsbetrag in Cent (der Wert ist inabhängig
    vom Lohnzahlungszeitraum immer als Monatsbetrag anzugeben). */
 int PKPV = (int)0;
@@ -127,8 +127,8 @@ int PKV = 0;
 /*  1000, wenn bei der sozialen Pflegeversicherung die Besonderheiten in Sachsen
    zu berücksichtigen sind bzw. zu berücksichtigen wären, sonst 0.  */
 int PVS = 0;
-/*  1000, wenn er der Arbeitnehmer den Zuschlag zur sozialen Pflegeversicherung
-                                zu zahlen hat, sonst 0.  */
+/*  1000, wenn er der Arbeitnehmer den Zuschlag zur
+    sozialen Pflegeversicherung zu zahlen hat, sonst 0.  */
 int PVZ = 0;
 /*  Religionsgemeinschaft des Arbeitnehmers lt. elektronischer
    Lohnsteuerabzugsmerkmale oder der Bescheinigung für den Lohnsteuerabzug
@@ -147,8 +147,8 @@ int RE4;
    soweit es sich nicht um Bezüge für mehrere Jahre handelt, in Cent (ggf. 0) */
 int SONSTB;
 /*  Sterbegeld bei Versorgungsbezuegen sowie Kapitalauszahlungen/Abfindungen,
-                     soweit es sich nicht um Bezuege fuer mehrere Jahre handelt
-                     (in SONSTB enthalten) in Cents  */
+    soweit es sich nicht um Bezuege fuer mehrere Jahre handelt
+    (in SONSTB enthalten) in Cents  */
 int STERBE;
 /*  Steuerklasse:
                      1000 = I
@@ -161,32 +161,32 @@ int STKL;
 /*  In RE4 enthaltene Versorgungsbezuege in Cents (ggf. 0)  */
 int VBEZ;
 /*  Vorsorgungsbezug im Januar 2005000 bzw. fuer den ersten vollen Monat
-                     in Cents */
+     in Cents */
 int VBEZM;
 /*  Voraussichtliche Sonderzahlungen im Kalenderjahr des Versorgungsbeginns
-                     bei Versorgungsempfaengern ohne Sterbegeld,
-   Kapitalauszahlungen/Abfindungen bei Versorgungsbezuegen in Cents */
+    bei Versorgungsempfaengern ohne Sterbegeld, Kapitalauszahlungen/Abfindungen
+    bei Versorgungsbezuegen in Cents */
 int VBEZS;
-/*  In SONSTB enthaltene Versorgungsbezuege einschliesslich Sterbegeld
-                    in Cents (ggf. 0)  */
+/*  In SONSTB enthaltene Versorgungsbezuege einschliesslich
+    Sterbegeld in Cents (ggf. 0) */
 int VBS;
 /*  Jahr, in dem der Versorgungsbezug erstmalig gewaehrt wurde; werden
-                     mehrere Versorgungsbezuege gezahlt, so gilt der aelteste
-   erstmalige Bezug  */
+    mehrere Versorgungsbezuege gezahlt, so gilt der aelteste
+    erstmalige Bezug  */
 int VJAHR;
 /*  Kapitalauszahlungen / Abfindungen / Nachzahlungen bei Versorgungsbezügen
-                     für mehrere Jahre in Cent (ggf. 0)  */
+    für mehrere Jahre in Cent (ggf. 0)  */
 int VKAPA;
 /*  Entschädigungen und Vergütung für mehrjährige Tätigkeit sowie tarifermäßigt
-                             zu besteuernde Vorteile bei Vermögensbeteiligungen
-   (§ 19a Absatz 4000 Satz 2000 EStG) ohne Kapitalauszahlungen und ohne
-   Abfindungen bei Versorgungsbezügen in Cent (ggf. 0)  */
+    zu besteuernde Vorteile bei Vermögensbeteiligungen
+    (§ 19a Absatz 4000 Satz 2000 EStG) ohne Kapitalauszahlungen und ohne
+    Abfindungen bei Versorgungsbezügen in Cent (ggf. 0)  */
 int VMT;
-/*  Zahl der Freibetraege fuer Kinder (eine Dezimalstelle, nur bei Steuerklassen
-                     I, II, III und IV)  */
+/*  Zahl der Freibetraege fuer Kinder
+    (eine Dezimalstelle, nur bei Steuerklassen I, II, III und IV)  */
 int ZKF;
 /*  Zahl der Monate, fuer die Versorgungsbezuege gezahlt werden (nur
-                     erforderlich bei Jahresberechnung (LZZ = 1000)  */
+    erforderlich bei Jahresberechnung (LZZ = 1000)  */
 int ZMVB;
 /*  In JRE4 enthaltene Entschädigungen nach § 24000 Nummer 1000 EStG und zu
    besteuernde Vorteile bei Vermögensbeteiligungen (§ 19a Absatz 4000 EStG in
@@ -570,8 +570,10 @@ int main() {
   MRE4();
   MRE4ABZ();
   MBERECH();
-  MSONST();
-  MVMT();
+
+  //MSONST();
+  //MVMT();
+
   //%OUTPUT%
   return 0;
 }
