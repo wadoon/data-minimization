@@ -1,0 +1,11 @@
+AUTO_FACTS:
+- einkommen < 10347
+- '!false'
+INPUTS:
+  einkommen: 5626
+INTERNAL:
+  lohnsteuer: None
+OUTPUTS:
+  psatz: 0
+USER_FACTS:
+- (einkommen < 10347)

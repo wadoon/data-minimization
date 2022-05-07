@@ -113,9 +113,23 @@ class ExpressionRewriter(NodeVisitor):
         elif node.type == 'boolean':
             return "true" == node.value
         elif node.type == 'float':
-            return np.int32(node.value) # np.float(node.value)
+            return np.int32(node.value)  # np.float(node.value)
         else:
             assert False
+
+    def visit_TernaryOp(self, node: TernaryOp):
+        cond = NodeVisitor.visit(self, node.cond)
+        if is_concrete(cond):
+            if cond:
+                return NodeVisitor.visit(self, node.iftrue)
+            else:
+                return NodeVisitor.visit(self, node.iffalse)
+        else:
+            iftrue = NodeVisitor.visit(self, node.iftrue)
+            iffalse = NodeVisitor.visit(self, node.iffalse)
+            return TernaryOp(cond,
+                             iftrue if not is_concrete(iftrue) else Constant('int', iftrue),
+                             iffalse if not is_concrete(iffalse) else Constant('int', iffalse))
 
     def visit_BinaryOp(self, node: c_ast.BinaryOp):
         left = NodeVisitor.visit(self, node.left)
@@ -166,7 +180,6 @@ class Evaluator(NodeVisitor):
             ary.append(NodeVisitor.visit(self, e))
         return ary
 
-
     def init_global_state(self):
         for c in self.file_ast:
             if isinstance(c, c_ast.Decl) and not isinstance(c.type, c_ast.FuncDecl):
@@ -205,11 +218,17 @@ class Evaluator(NodeVisitor):
     def visit_Constant(self, node: c_ast.Constant):
         if node.type == 'int':
             return np.int32(node.value)
+        elif node.type == 'char':
+            try:
+                return np.uint8(node.value)
+            except:
+                return np.uint8(ord(node.value.strip('\'"')[0]))
         elif node.type == 'boolean':
             return "true" == node.value
         elif node.type == 'float':
-            return np.int32(node.value) # np.float(node.value)
+            return np.int32(node.value)  # np.float(node.value)
         else:
+            print(f">>> Unexpected type {node.type}")
             assert False
 
     def visit_Assignment(self, node: c_ast.Assignment):
@@ -219,10 +238,10 @@ class Evaluator(NodeVisitor):
             Assignment(node.op, node.lvalue,
                        svalue if not is_concrete(svalue) else Constant('int', svalue)))
 
-        value = np.int32( NodeVisitor.visit(self, node.rvalue) )
+        value = np.int32(NodeVisitor.visit(self, node.rvalue))
         name = node.lvalue.name
         self.memory[name] = value
-        print(f"Execute assignment {name} = {value} {type(value)} ({node.coord})")
+        print(f">>> Execute assignment {name} = {value} {type(value)} ({node.coord})")
 
     def visit_If(self, node: c_ast.If):
         cond = NodeVisitor.visit(self, node.cond)
@@ -234,6 +253,13 @@ class Evaluator(NodeVisitor):
         elif node.iffalse:
             self.computation_trace.append(c_ast.FuncCall(ID("assume"), c_ast.UnaryOp("!", s_cond)))
             NodeVisitor.visit(self, node.iffalse)
+
+    def visit_TernaryOp(self, node: TernaryOp):
+        cond = NodeVisitor.visit(self, node.cond)
+        if cond:
+            return NodeVisitor.visit(self, node.iftrue)
+        else:
+            return NodeVisitor.visit(self, node.iffalse)
 
     def visit_BinaryOp(self, node: c_ast.BinaryOp):
         left = NodeVisitor.visit(self, node.left)

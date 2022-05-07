@@ -1,0 +1,12 @@
+INPUTS:
+  einkommen: 35252
+INTERNAL:
+  lohnsteuer: None
+OUTPUTS:
+  psatz: 20
+USER_FACTS:
+  - einkommen < 40000
+  - einkommen > 35000
+USER_FACTS_1:
+  - einkommen < 40000
+  - einkommen > 30000

@@ -1,0 +1,14 @@
+AUTO_FACTS:
+#- '!(einkommen < 10347)'
+#- '!(einkommen < 14926)'
+- '!(einkommen < 58596)'
+#- einkommen < 277825
+- ((((42 * einkommen)/100 - 9336) * 100 / einkommen)/10)+1*10==30
+INPUTS:
+  einkommen: 60000
+INTERNAL:
+  lohnsteuer: None
+OUTPUTS:
+  psatz: 30
+SELECTED_FACTS:
+- '!(einkommen < 10347)'

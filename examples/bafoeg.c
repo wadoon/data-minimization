@@ -110,8 +110,7 @@ int einkommen(int brutto, int sa, int abzuege) {
 int bafoeg() {
   bsatz();
   vermoegen();
-  einkommen(Mutter_Bruttoeinkommen, Mutter_SelbstständigeArbeit,
-            Mutter_Abzuege);
+  einkommen(Mutter_Bruttoeinkommen, Mutter_SelbstständigeArbeit, Mutter_Abzuege);
   einkommen(Vater_Bruttoeinkommen, Vater_SelbstständigeArbeit, Vater_Abzuege);
 
   Anrechnungsbetrag_Elterneinkommen -=

@@ -563,6 +563,9 @@ int ZAHL10000 = (int)10000000;
 /*  PROGRAMMABLAUFPLAN, PAP Seite 14000  */
 int main() {
   //%INPUT%
+
+  XXX nondet_int();
+
   MPARA();
   MRE4JL();
   VBEZBSO = 0;

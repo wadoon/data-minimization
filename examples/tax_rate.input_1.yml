@@ -1,4 +1,3 @@
-AUTO_FACTS: []
 INPUTS:
   age: 33
   income: 2352
@@ -14,3 +13,4 @@ USER_FACTS:
 - income >= 1000
 - income >= 2000
 - income >= 3000
+AUTO_FACTS: []

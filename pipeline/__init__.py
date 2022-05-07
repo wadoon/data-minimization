@@ -9,8 +9,8 @@ import click
 import pycparser
 import yaml
 
-from .evaluator import Evaluator
-from .helper import *
+from pipeline.evaluator import Evaluator
+from pipeline.helper import *
 
 TMP_FOLDER: Path = Path("./tmp").absolute()
 ALTERNATIVE_YAML_OUT_FILENAME: Path = None
@@ -107,6 +107,9 @@ def extract_facts_fwd(config, filename, fact_name):
                 local_facts.append(txt.replace("False","false").replace('True','true'))
 
         trace_computation = list(e.computation_trace)
+        for tc in trace_computation:
+            log(out.visit(tc))
+
         trace_computation.reverse()
         for var in config['OUTPUTS'].keys():
             log(f"Output constraint {var}")
@@ -301,6 +304,12 @@ def fact_consistency(config: Path, filename: Path, fact_names: typing.List[str])
         # return False
 
 
+def cbmc_args(config):
+    if 'CBMC' in config:
+        return ' '.join(f"--{k} {v}" for k,v in config['CBMC'].items())
+    return ""
+
+
 @cli.command()
 @group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
 def facts_preciseness(config, filename, fact_names):
@@ -328,13 +337,15 @@ def facts_preciseness(config, filename, fact_names):
 
     _augment_program(filename, tmp_file, a, b)
 
-    run_command = f"cbmc {tmp_file}"
-    exitcode, _ = subprocess.getstatusoutput(run_command)
+    run_command = f"cbmc {cbmc_args(config)} {tmp_file}"
+    log(f"Execute {run_command}")
+    exitcode, output = subprocess.getstatusoutput(run_command)
+    print(output)
     if exitcode == 0:
         log(f"Successful: Facts are precise {exitcode}==0")
         return True
     else:
-        log("Error: Facts are imprecise")
+        log(f"Error: Facts are imprecise {exitcode==0}")
         sys.exit(1)
         # return False
 
@@ -437,6 +448,11 @@ def symbex(config, filename: Path, fact_names: typing.List[str], set_output_valu
 
     assignments = ""
     outputs = ""
+
+    for var in cfg['INPUTS']:
+        assignments += f"\n{var} = nondet_int();"
+
+    log(f"Use facts: {fact_names}")
     for (idx, value) in enumerate(_get_facts(cfg, fact_names)):
         log(f"> Add fact {value}")
         assignments += f"\n__CPROVER_assume({value});"
@@ -448,6 +464,7 @@ def symbex(config, filename: Path, fact_names: typing.List[str], set_output_valu
     log("Run CBMC:", run_command)
     exitcode, output = subprocess.getstatusoutput(run_command)
     jout = json.loads(output)
+
     for entry in jout:
         if "result" in entry:
             result = entry['result'][0]['trace']
@@ -471,12 +488,11 @@ def symbex(config, filename: Path, fact_names: typing.List[str], set_output_valu
 
 @cli.command()
 @group_options(ARG_CONFIG, ARG_FILENAME, OPT_FACT_NAMES)
-#@click.option("--ignore-xor-facts", default=True, type=click.BOOL)
 def minimize_facts_core(config, filename: Path, fact_names):
     tmpfile = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.c")
     smt_file = TMP_FOLDER / (filename.stem + "_cbmc_factmcheck.smt2")
-    prepare_command = f"cbmc --z3 --outfile {smt_file} {tmpfile}"
     cfg = _load_config(config)
+    prepare_command = f"cbmc {cbmc_args(cfg)} --z3 --outfile {smt_file} {tmpfile}"
     facts = _get_facts(cfg, fact_names)
     # facts = filter_facts(facts)  # only satisfied facts are allowed
 
@@ -487,11 +503,13 @@ def minimize_facts_core(config, filename: Path, fact_names):
 
         log("Inject fact as assumption")
 
-        assignments = "__CPROVER_bool TRUE = 1; //A constant which is always true\n"
+        assignments = ""
+        for var in cfg['INPUTS']:
+            assignments += f"\n{var} = nondet_int();"
+
         for (idx, value) in enumerate(facts):
             log(f"> Add fact {value}")
             assignments += f"\n__CPROVER_bool FACT_{idx}; //FACT_{idx} = 1;"
-            # assignments += f"\n__CPROVER_input(\"FACT_{idx}\", FACT_{idx});"
             assignments += f"\nif(FACT_{idx}) __CPROVER_assume({value});"
 
         # if respect_contra_table and False:
@@ -612,7 +630,7 @@ def unique_selfcomp(config, filename, eqin=True):
     """
     tmpfile = "lohnsteuer_cbmcsc.c"
     smt_file = "lohnsteuer_cbmc.smt2"
-    run_command = "cbmc --z3 --trace" + tmpfile
+    run_command = f"cbmc {cbmc_args(config)} --z3 --trace {tmpfile}"
 
     ast = pycparser.parse_file(filename, True, cpp_args="-DNOHEADER=1")
 

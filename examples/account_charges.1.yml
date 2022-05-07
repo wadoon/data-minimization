@@ -1,0 +1,10 @@
+CBMC:
+  unwindset: charge.0:10
+INPUTS:
+  age: 17
+  income: 2000
+  reward: 0
+OUTPUTS:
+  charges: 0
+USER_FACTS:
+- age < 18
